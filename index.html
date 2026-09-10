@@ -1,371 +1,583 @@
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 
 <style>
   :root{
-    --bg: #F7F2EA; --panel: #FFFFFF; --ink: #2C1F16; --ink-soft: #6B5A4C; --line: #E4D9C9;
-    --coffee: #4A3222; --caramel: #C17817; --ok: #3D7A5C; --warn:#C0392B;
-    --c1:#C0392B; --c2:#D98A1F; --c3:#1F8A8C; --c4:#4A5FA0; --c5:#7D5BA6; --c6:#8A8D91;
-    --radius: 14px; --shadow: 0 1px 2px rgba(44,31,22,0.06), 0 8px 24px -12px rgba(44,31,22,0.18);
+    --navy: #14181C;
+    --navy2: #1D2329;
+    --green: #2E8B45;
+    --green-dk: #1F6633;
+    --green-lt: #E8F5EA;
+    --bg: #F2F4F3;
+    --panel: #FFFFFF;
+    --ink: #1A1F23;
+    --ink-soft: #5B6670;
+    --line: #DCE1E3;
+    --red: #C0392B;
+    --amber: #D98A1F;
+    --teal: #1F8A8C;
+    --blue: #4A5FA0;
+    --purple: #7D5BA6;
+    --gray: #8A8D91;
+    --radius: 10px;
+    --shadow: 0 1px 2px rgba(20,24,28,0.06), 0 8px 20px -10px rgba(20,24,28,0.25);
   }
   *{box-sizing:border-box;}
   body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;}
-  .app{max-width:1180px;margin:0 auto;padding:28px 24px 60px;}
-  .topbar{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:22px;flex-wrap:wrap;}
-  .brand-eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--caramel);font-weight:600;}
-  .brand-title{font-family:'Fraunces',serif;font-weight:600;font-size:28px;line-height:1.1;color:var(--coffee);margin:4px 0 2px;}
-  .brand-sub{font-size:13px;color:var(--ink-soft);}
-  .header-right{display:flex;align-items:center;gap:14px;}
-  .sync-wrap{display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-soft);}
-  .sync-dot{width:8px;height:8px;border-radius:50%;background:#94a3b8;display:inline-block;}
-  .tabs{display:flex;gap:6px;background:var(--panel);padding:5px;border-radius:999px;border:1px solid var(--line);box-shadow:var(--shadow);}
-  .tab{border:none;background:transparent;padding:9px 18px;border-radius:999px;font-weight:600;font-size:13.5px;color:var(--ink-soft);cursor:pointer;transition:all .18s ease;}
-  .tab.active{background:var(--coffee);color:#fff;}
-  .tab:not(.active):hover{color:var(--coffee);}
-  .view{display:none;} .view.active{display:block;}
-  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px;}
-  .panel + .panel{margin-top:18px;}
-  .panel-title{font-family:'Fraunces',serif;font-weight:600;font-size:18px;color:var(--coffee);margin:0 0 4px;}
-  .panel-hint{font-size:12.5px;color:var(--ink-soft);margin:0 0 18px;}
-  .grid{display:grid;gap:14px;}
-  .grid-2{grid-template-columns:1fr 1fr;} .grid-3{grid-template-columns:repeat(3,1fr);} .grid-4{grid-template-columns:repeat(4,1fr);}
-  @media (max-width:760px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}}
-  label{display:block;font-size:12px;font-weight:600;color:var(--ink-soft);margin-bottom:6px;text-transform:uppercase;letter-spacing:.03em;}
-  input,select,textarea{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:9px;font-size:14px;color:var(--ink);background:#FCFAF6;}
-  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--caramel);}
-  textarea{resize:vertical;min-height:56px;}
-  .field{margin-bottom:14px;}
-  .btn{border:none;border-radius:9px;padding:11px 22px;font-weight:700;font-size:14px;cursor:pointer;}
-  .btn-primary{background:var(--coffee);color:#fff;} .btn-primary:hover{opacity:.9;}
-  .btn-ghost{background:transparent;color:var(--ink-soft);border:1.5px solid var(--line);}
-  .btn-ghost:hover{border-color:var(--caramel);color:var(--caramel);}
-  .btn-danger{background:transparent;color:#B33A2E;border:none;font-size:12px;font-weight:600;cursor:pointer;}
-  .btn-period{border:1.5px solid var(--line);background:#fff;color:var(--ink-soft);padding:8px 14px;border-radius:8px;font-weight:600;font-size:12.5px;cursor:pointer;}
-  .btn-period.active{background:var(--coffee);border-color:var(--coffee);color:#fff;}
-  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(8px);background:var(--coffee);color:#fff;padding:11px 20px;border-radius:9px;font-size:13.5px;font-weight:600;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:all .25s ease;z-index:50;}
-  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-  .kpi{border:1px solid var(--line);border-radius:12px;padding:16px 18px;background:linear-gradient(160deg,#FFFFFF,#FBF6EE);}
-  .kpi-label{font-size:11.5px;font-weight:600;color:var(--ink-soft);text-transform:uppercase;margin-bottom:8px;}
-  .kpi-value{font-family:'Fraunces',serif;font-weight:600;font-size:26px;color:var(--coffee);}
-  .kpi-value small{font-size:13px;font-weight:500;color:var(--ink-soft);}
-  .chart-box{position:relative;height:270px;}
-  table{width:100%;border-collapse:collapse;font-size:13px;}
-  th{text-align:left;font-size:11px;text-transform:uppercase;color:var(--ink-soft);border-bottom:2px solid var(--line);padding:8px 10px;font-weight:700;white-space:nowrap;}
-  td{padding:9px 10px;border-bottom:1px solid var(--line);white-space:nowrap;}
-  tr:hover td{background:#FBF6EE;}
-  .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11.5px;font-weight:700;}
-  .empty{text-align:center;padding:36px 20px;color:var(--ink-soft);font-size:13.5px;}
-  .filters{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;}
-  .filters .field{margin-bottom:0;min-width:150px;flex:0 0 auto;}
-  .table-scroll{overflow-x:auto;}
-  .hero-metric{background:linear-gradient(135deg,var(--coffee),#2C1F16);border-radius:16px;padding:26px 28px;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;box-shadow:var(--shadow);}
-  .hero-label{font-size:12px;font-weight:600;text-transform:uppercase;color:#E8D9C4;margin-bottom:6px;}
-  .hero-value{font-family:'Fraunces',serif;font-weight:700;font-size:46px;line-height:1;}
-  .hero-sub{font-size:13px;color:#E8D9C4;margin-top:8px;}
-  .hero-side{display:flex;gap:26px;flex-wrap:wrap;}
-  .hero-mini{text-align:center;min-width:100px;}
-  .hero-mini span{display:block;font-family:'Fraunces',serif;font-weight:600;font-size:22px;}
-  .hero-mini small{display:block;font-size:11px;color:#E8D9C4;margin-top:4px;text-transform:uppercase;}
-  .rank-row{display:flex;align-items:center;gap:12px;padding:10px 4px;border-bottom:1px solid var(--line);}
-  .rank-row:last-child{border-bottom:none;}
-  .rank-name{font-weight:600;font-size:13.5px;min-width:190px;}
-  .rank-bar-wrap{flex:1;background:#F1E9DB;border-radius:6px;height:10px;overflow:hidden;}
-  .rank-bar{height:100%;border-radius:6px;}
-  .rank-val{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:13px;min-width:70px;text-align:right;}
-  .proceso-card{border:1.5px solid var(--line);border-radius:12px;padding:16px 18px;background:#FDFBF8;border-top:4px solid var(--pc);}
-  .proceso-card .pc-name{font-family:'Fraunces',serif;font-weight:600;font-size:15px;color:var(--pc);margin-bottom:10px;}
-  .proceso-card .pc-main{font-family:'Fraunces',serif;font-weight:700;font-size:26px;color:var(--coffee);line-height:1;}
-  .proceso-card .pc-main small{font-size:12px;font-weight:500;color:var(--ink-soft);}
-  .proceso-card .pc-row{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-soft);margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);}
-  .proceso-card .pc-row b{color:var(--ink);font-weight:600;}
-  .subtabs{display:flex;gap:6px;flex-wrap:wrap;}
-  .subtab{border:1.5px solid var(--line);background:#fff;color:var(--ink-soft);padding:8px 16px;border-radius:8px;font-weight:600;font-size:12.5px;cursor:pointer;}
-  .subtab.active{background:var(--caramel);border-color:var(--caramel);color:#fff;}
-  .subtab:not(.active):hover{border-color:var(--caramel);color:var(--caramel);}
+  .app{max-width:1320px;margin:0 auto;}
+
+  /* ===== TOP NAV (dark) ===== */
+  .topnav{background:var(--navy);display:flex;align-items:center;gap:2px;padding:0 18px;overflow-x:auto;}
+  .topnav-logo{color:#fff;font-weight:800;font-size:14px;letter-spacing:.04em;padding:14px 18px 14px 0;white-space:nowrap;display:flex;align-items:center;gap:8px;}
+  .topnav-logo .dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;}
+  .navtab{background:transparent;border:none;color:#B7C0C7;font-family:'Inter',sans-serif;font-weight:600;font-size:13.5px;padding:16px 18px;cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;transition:all .15s;}
+  .navtab:hover{color:#fff;}
+  .navtab.active{color:#fff;background:var(--navy2);border-bottom:3px solid var(--green);}
+  .topnav-right{margin-left:auto;display:flex;align-items:center;gap:10px;padding-right:4px;}
+  .sync-wrap{display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#B7C0C7;white-space:nowrap;}
+  .sync-dot{width:7px;height:7px;border-radius:50%;background:#8A8D91;display:inline-block;}
+
+  /* ===== TOOLBAR (green) ===== */
+  .toolbar{background:var(--green);display:flex;align-items:center;gap:4px;padding:9px 18px;flex-wrap:wrap;}
+  .tbtn{background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.22);color:#fff;font-family:'Inter',sans-serif;font-weight:600;font-size:12.5px;padding:8px 14px;border-radius:7px;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;transition:background .15s;}
+  .tbtn:hover{background:rgba(255,255,255,0.26);}
+  .tbtn.primary{background:#fff;color:var(--green-dk);border-color:#fff;}
+  .tbtn.primary:hover{background:#F0F0F0;}
+  .toolbar-sep{width:1px;height:20px;background:rgba(255,255,255,0.3);margin:0 6px;}
+  .toolbar-spacer{margin-left:auto;}
+
+  /* ===== VIEWS ===== */
+  .view{display:none;padding:20px 18px 50px;} .view.active{display:block;}
   .subview{display:none;} .subview.active{display:block;}
-  @media print{ .subview{display:block !important;} }
+
+  /* ===== GRID (data table like reference) ===== */
+  .gridcard{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
+  .gridcard + .gridcard{margin-top:16px;}
+  .grid-title-bar{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;background:#FAFBFB;}
+  .grid-title{font-weight:700;font-size:13.5px;color:var(--ink);}
+  .grid-count{font-size:11.5px;color:var(--ink-soft);font-family:'JetBrains Mono',monospace;}
+  .grid-scroll{overflow-x:auto;}
+  table.grid{width:100%;border-collapse:collapse;font-size:12.5px;}
+  table.grid thead th{background:#EFF2F1;text-align:left;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-soft);padding:9px 12px;border-bottom:2px solid var(--line);white-space:nowrap;}
+  table.grid thead th.chk{width:36px;}
+  table.grid tbody td{padding:9px 12px;border-bottom:1px solid var(--line);white-space:nowrap;color:var(--ink);}
+  table.grid tbody tr:hover td{background:var(--green-lt);}
+  table.grid tbody tr:nth-child(even) td{background:#FAFBFB;}
+  table.grid tbody tr:nth-child(even):hover td{background:var(--green-lt);}
+  table.grid input[type=checkbox]{accent-color:var(--green);}
+  .row-del{background:none;border:none;color:var(--red);font-weight:700;font-size:11.5px;cursor:pointer;}
+  .row-edit{background:none;border:none;color:var(--green-dk);font-weight:700;font-size:11.5px;cursor:pointer;}
+  .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:700;}
+  .pill-ok{background:#E4F1E8;color:var(--green-dk);}
+  .pill-warn{background:#FBE7E4;color:var(--red);}
+  .grid-empty{text-align:center;padding:40px 20px;color:var(--ink-soft);font-size:13px;}
+
+  /* ===== FILTER BAR ===== */
+  .filterbar{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 16px;display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px;}
+  .filterbar .field{margin-bottom:0;min-width:140px;}
+  .field label{display:block;font-size:10.5px;font-weight:700;color:var(--ink-soft);margin-bottom:5px;text-transform:uppercase;letter-spacing:.03em;}
+  .field input, .field select, .field textarea{width:100%;padding:8px 10px;border:1.5px solid var(--line);border-radius:7px;font-size:13px;color:var(--ink);background:#FCFDFC;}
+  .field input:focus, .field select:focus, .field textarea:focus{outline:none;border-color:var(--green);}
+  .period-group{display:flex;gap:3px;}
+  .pbtn{border:1.5px solid var(--line);background:#fff;color:var(--ink-soft);padding:7px 12px;border-radius:6px;font-weight:600;font-size:11.5px;cursor:pointer;}
+  .pbtn.active{background:var(--green);border-color:var(--green);color:#fff;}
+
+  /* ===== KPI / HERO ===== */
+  .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
+  @media (max-width:900px){.kpi-row{grid-template-columns:repeat(2,1fr);}}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--green);border-radius:8px;padding:14px 16px;box-shadow:var(--shadow);}
+  .kpi-label{font-size:10.5px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px;}
+  .kpi-value{font-weight:800;font-size:23px;color:var(--ink);}
+  .kpi-value small{font-size:12px;font-weight:600;color:var(--ink-soft);}
+  .kpi-value.warn{color:var(--red);}
+
+  .hero{background:linear-gradient(135deg,var(--navy),var(--navy2));border-radius:var(--radius);padding:22px 24px;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;box-shadow:var(--shadow);margin-bottom:16px;}
+  .hero-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#9BC9A8;margin-bottom:4px;}
+  .hero-value{font-weight:800;font-size:44px;line-height:1;}
+  .hero-sub{font-size:12.5px;color:#9BC9A8;margin-top:6px;}
+  .hero-side{display:flex;gap:22px;flex-wrap:wrap;}
+  .hero-mini{text-align:center;min-width:88px;}
+  .hero-mini span{display:block;font-weight:800;font-size:20px;}
+  .hero-mini small{display:block;font-size:10px;color:#9BC9A8;margin-top:3px;text-transform:uppercase;}
+
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;}
+  .panel + .panel{margin-top:14px;}
+  .panel-title{font-weight:700;font-size:14px;color:var(--ink);margin:0 0 4px;}
+  .panel-hint{font-size:11.5px;color:var(--ink-soft);margin:0 0 12px;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;} .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  @media (max-width:900px){.grid2,.grid3{grid-template-columns:1fr;}}
+  .chart-box{position:relative;height:250px;}
+  .rank-row{display:flex;align-items:center;gap:10px;padding:8px 2px;border-bottom:1px solid var(--line);}
+  .rank-row:last-child{border-bottom:none;}
+  .rank-name{font-weight:600;font-size:12.5px;min-width:170px;}
+  .rank-bar-wrap{flex:1;background:#EDEFEE;border-radius:5px;height:9px;overflow:hidden;}
+  .rank-bar{height:100%;border-radius:5px;}
+  .rank-val{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12px;min-width:66px;text-align:right;}
+  .legend-row{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:11px;color:var(--ink-soft);}
+  .legend-row span{display:inline-flex;align-items:center;gap:5px;}
+  .legend-row .dot{width:8px;height:8px;border-radius:50%;}
+  .proc-card{border:1.5px solid var(--line);border-radius:9px;padding:14px;background:#FAFBFB;border-top:4px solid var(--pc);}
+  .proc-card .pc-name{font-weight:700;font-size:13px;color:var(--pc);margin-bottom:8px;}
+  .proc-card .pc-main{font-weight:800;font-size:22px;color:var(--ink);line-height:1;}
+  .proc-card .pc-main small{font-size:11px;font-weight:600;color:var(--ink-soft);}
+  .proc-card .pc-row{display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink-soft);margin-top:7px;padding-top:7px;border-top:1px dashed var(--line);}
+  .proc-card .pc-row b{color:var(--ink);font-weight:700;}
+  .subtabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px;}
+  .stbtn{border:1.5px solid var(--line);background:#fff;color:var(--ink-soft);padding:7px 14px;border-radius:7px;font-weight:600;font-size:11.5px;cursor:pointer;}
+  .stbtn.active{background:var(--navy);border-color:var(--navy);color:#fff;}
+
+  /* ===== MODAL (green header, tabs) ===== */
+  .modal-overlay{position:fixed;inset:0;background:rgba(20,24,28,.55);z-index:200;display:none;align-items:flex-start;justify-content:center;padding:36px 16px;overflow-y:auto;}
+  .modal-overlay.show{display:flex;}
+  .modal{background:#fff;border-radius:12px;width:100%;max-width:680px;box-shadow:0 24px 60px rgba(0,0,0,.35);overflow:hidden;}
+  .modal-head{background:var(--green);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;}
+  .modal-head-title{font-weight:700;font-size:14.5px;}
+  .modal-close{background:rgba(255,255,255,.2);border:none;color:#fff;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:14px;}
+  .modal-tabs{display:flex;background:#F2F4F3;border-bottom:1px solid var(--line);}
+  .mtab{flex:1;text-align:center;padding:11px 8px;font-size:12px;font-weight:700;color:var(--ink-soft);cursor:pointer;border-bottom:3px solid transparent;background:none;border-top:none;border-left:none;border-right:none;}
+  .mtab.active{color:var(--green-dk);border-bottom-color:var(--green);background:#fff;}
+  .modal-body{padding:20px;max-height:60vh;overflow-y:auto;}
+  .modal-pane{display:none;} .modal-pane.active{display:block;}
+  .modal-foot{padding:14px 20px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px;}
+  .btn{border:none;border-radius:7px;padding:10px 18px;font-weight:700;font-size:13px;cursor:pointer;}
+  .btn-primary{background:var(--green);color:#fff;} .btn-primary:hover{background:var(--green-dk);}
+  .btn-ghost{background:#fff;color:var(--ink-soft);border:1.5px solid var(--line);}
+  .btn-ghost:hover{border-color:var(--green);color:var(--green-dk);}
+  .defect-mini{border:1.5px solid var(--line);border-radius:8px;padding:10px 12px;background:#FAFBFB;}
+  .defect-mini .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;}
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(8px);background:var(--navy);color:#fff;padding:11px 20px;border-radius:8px;font-size:13px;font-weight:600;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:all .25s ease;z-index:300;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .empty{text-align:center;padding:16px;color:var(--ink-soft);font-size:12.5px;}
   @media print{
-    .dash-print-hide, .topbar .tabs { display:none !important; }
-    body{background:#fff;} .panel{box-shadow:none;border:1px solid #ddd;}
+    .topnav,.toolbar,.dash-print-hide{display:none !important;}
+    body{background:#fff;} .panel,.gridcard,.kpi,.hero{box-shadow:none;border:1px solid #ddd;}
+    .subview{display:block !important;}
   }
 </style>
 
 <div class="app">
-  <div class="topbar">
-    <div>
-      <div class="brand-eyebrow">CAFIVER · Envasado Frascos, Stick y Doy Pack</div>
-      <div class="brand-title">Bitácora de Tiempos Perdidos</div>
-      <div class="brand-sub">PSA-FOR-047 — captura electrónica de paros</div>
-    </div>
-    <div class="header-right">
+  <!-- ===== TOP NAV ===== -->
+  <div class="topnav">
+    <div class="topnav-logo"><span class="dot"></span>CAFIVER · PRODUCCIÓN</div>
+    <button class="navtab active" data-nav="dp-grid">Doy Pack</button>
+    <button class="navtab" data-nav="dp-dash">Dashboard Doy Pack</button>
+    <button class="navtab" data-nav="tp-grid">Tiempos Perdidos</button>
+    <button class="navtab" data-nav="tp-dash">Dashboard Tiempos Perdidos</button>
+    <div class="topnav-right">
       <div class="sync-wrap"><span id="sync-dot" class="sync-dot"></span><span id="sync-txt">Cargando…</span></div>
-      <div class="tabs">
-        <button class="tab active" data-view="captura">Captura</button>
-        <button class="tab" data-view="dashboard">Dashboard</button>
-      </div>
     </div>
   </div>
 
-  <!-- CAPTURA -->
-  <div class="view active" id="view-captura">
-    <div class="panel">
-      <div class="panel-title">Nuevo evento de paro</div>
-      <p class="panel-hint">Registra cada paro en cuanto ocurra. La duración se calcula sola con la hora inicial y final.</p>
+  <!-- ===== TOOLBAR (contextual) ===== -->
+  <div class="toolbar" id="toolbar-dp-grid">
+    <button class="tbtn primary" id="btn-open-dp-modal">➕ Nuevo registro</button>
+    <button class="tbtn" id="btn-refresh-dp1">🔄 Actualizar</button>
+  </div>
+  <div class="toolbar" id="toolbar-dp-dash" style="display:none;">
+    <span style="color:#fff;font-weight:700;font-size:12.5px;">📊 Dashboard de Defectos y OEE</span>
+    <div class="toolbar-spacer"></div>
+    <button class="tbtn" id="btn-print-dp">🖨 Imprimir / PDF</button>
+  </div>
+  <div class="toolbar" id="toolbar-tp-grid" style="display:none;">
+    <button class="tbtn primary" id="btn-open-tp-modal">➕ Nuevo evento</button>
+    <button class="tbtn" id="btn-refresh-tp1">🔄 Actualizar</button>
+  </div>
+  <div class="toolbar" id="toolbar-tp-dash" style="display:none;">
+    <span style="color:#fff;font-weight:700;font-size:12.5px;">📊 Dashboard de Tiempos Perdidos</span>
+    <div class="toolbar-spacer"></div>
+    <button class="tbtn" id="btn-print-tp">🖨 Imprimir / PDF</button>
+  </div>
 
-      <div class="grid grid-4">
-        <div class="field">
-          <label>Fecha</label>
-          <input type="date" id="f-fecha">
-        </div>
-        <div class="field">
-          <label>Turno</label>
-          <select id="f-turno">
-            <option>Primero</option>
-            <option>Segundo</option>
-            <option>Tercero</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Planta</label>
-          <select id="f-planta">
-            <option>Frascos</option>
-            <option>Stick</option>
-            <option>Doy pack</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Lote de producción</label>
-          <input type="text" id="f-lote" placeholder="Ej. 3795LMA">
-        </div>
+  <!-- ===== VIEW: DOY PACK GRID ===== -->
+  <div class="view active" id="view-dp-grid">
+    <div class="gridcard">
+      <div class="grid-title-bar">
+        <div class="grid-title">Registros de inspección — ES-FOR-011 Ver 7</div>
+        <div class="grid-count" id="dp-grid-count">0 registros</div>
       </div>
-
-      <div class="grid grid-3">
-        <div class="field">
-          <label>Hora inicial</label>
-          <input type="time" id="f-hora-ini">
-        </div>
-        <div class="field">
-          <label>Hora final</label>
-          <input type="time" id="f-hora-fin">
-        </div>
-        <div class="field">
-          <label>Duración</label>
-          <input type="text" id="f-duracion" readonly placeholder="0.00 hrs" style="background:#F1E9DB;font-weight:700;color:var(--coffee);">
-        </div>
-      </div>
-
-      <div class="grid grid-2">
-        <div class="field">
-          <label>Componente / máquina</label>
-          <input type="text" id="f-maquina" placeholder="Ej. Sistema dosificador">
-        </div>
-        <div class="field">
-          <label>Tipo de paro</label>
-          <select id="f-tipo">
-            <option>🧰 Mantenimiento Correctivo</option>
-            <option>🔄 Proceso</option>
-            <option>✅ Calidad</option>
-            <option>⚙️ Servicios</option>
-            <option>💡 Logística</option>
-            <option>💡 Otro</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="field">
-        <label>Descripción</label>
-        <textarea id="f-desc" placeholder="¿Qué pasó?"></textarea>
-      </div>
-      <div class="field">
-        <label>Acción de corrección</label>
-        <textarea id="f-accion" placeholder="¿Qué se hizo para resolverlo? (N/A si no aplica)"></textarea>
-      </div>
-
-      <div class="grid grid-2">
-        <div class="field">
-          <label>Operador</label>
-          <select id="f-operador"></select>
-          <div id="f-operador-otro-wrap" style="display:none;margin-top:8px;">
-            <input type="text" id="f-operador-otro" placeholder="Nombre del nuevo operador">
-            <div style="display:flex;gap:8px;margin-top:6px;">
-              <button type="button" class="btn btn-ghost" id="btn-add-operador" style="padding:7px 14px;font-size:12.5px;">Agregar</button>
-              <button type="button" class="btn-danger" id="btn-cancel-operador">Cancelar</button>
-            </div>
-          </div>
-        </div>
-        <div class="field">
-          <label>Responsable de atender</label>
-          <select id="f-responsable"></select>
-          <div id="f-responsable-otro-wrap" style="display:none;margin-top:8px;">
-            <input type="text" id="f-responsable-otro" placeholder="Nombre del nuevo responsable">
-            <div style="display:flex;gap:8px;margin-top:6px;">
-              <button type="button" class="btn btn-ghost" id="btn-add-responsable" style="padding:7px 14px;font-size:12.5px;">Agregar</button>
-              <button type="button" class="btn-danger" id="btn-cancel-responsable">Cancelar</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div style="display:flex;gap:10px;align-items:center;">
-        <button class="btn btn-primary" id="btn-guardar">Guardar evento</button>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-title">Eventos recientes</div>
-      <div class="table-scroll">
-        <table>
-          <thead><tr><th>Fecha</th><th>Turno</th><th>Planta</th><th>Máquina</th><th>Tipo</th><th>Duración</th><th>Operador</th><th></th></tr></thead>
-          <tbody id="tbl-recientes"></tbody>
+      <div class="grid-scroll">
+        <table class="grid">
+          <thead><tr>
+            <th class="chk"><input type="checkbox" disabled></th>
+            <th>Fecha</th><th>Turno</th><th>Presentación</th><th>Bruta</th><th>Neta</th><th>Defectos</th><th>% Def.</th><th>Realizó</th><th></th>
+          </tr></thead>
+          <tbody id="dp-grid-body"></tbody>
         </table>
       </div>
-      <div class="empty" id="recientes-empty" style="display:none;">Aún no hay eventos capturados.</div>
+      <div class="grid-empty" id="dp-grid-empty" style="display:none;">Aún no hay registros capturados.</div>
     </div>
   </div>
 
-  <!-- DASHBOARD -->
-  <div class="view" id="view-dashboard">
-    <div class="panel dash-print-hide">
-      <div class="filters">
-        <div class="field">
-          <label>Fecha de referencia</label>
-          <input type="date" id="dash-fecha-ref">
+  <!-- ===== VIEW: DOY PACK DASHBOARD ===== -->
+  <div class="view" id="view-dp-dash">
+    <div class="filterbar dash-print-hide">
+      <div class="field" style="min-width:150px;"><label>Fecha de referencia</label><input type="date" id="dp-fecha-ref"></div>
+      <div class="field" style="min-width:auto;">
+        <label>Período</label>
+        <div class="period-group">
+          <button class="pbtn active" data-dp-period="dia">Día</button>
+          <button class="pbtn" data-dp-period="semana">Semana</button>
+          <button class="pbtn" data-dp-period="mes">Mes</button>
+          <button class="pbtn" data-dp-period="año">Año</button>
+          <button class="pbtn" data-dp-period="rango">Rango</button>
         </div>
-        <div class="field" style="flex:0 0 auto;">
-          <label>Período</label>
-          <div style="display:flex;gap:4px;">
-            <button class="btn-period active" data-period="dia">Día</button>
-            <button class="btn-period" data-period="semana">Semana</button>
-            <button class="btn-period" data-period="mes">Mes</button>
-            <button class="btn-period" data-period="año">Año</button>
-            <button class="btn-period" data-period="rango">Rango</button>
-          </div>
-        </div>
-        <div class="field" id="rango-wrap" style="display:none;">
-          <label>Del — al</label>
-          <div style="display:flex;gap:6px;">
-            <input type="date" id="dash-rango-ini" style="width:140px;">
-            <input type="date" id="dash-rango-fin" style="width:140px;">
-          </div>
-        </div>
-        <div class="field"><label>Planta</label><select id="dash-planta"><option value="">Todas</option><option>Frascos</option><option>Stick</option><option>Doy pack</option></select></div>
-        <button class="btn btn-ghost" id="btn-limpiar-filtros">Limpiar</button>
-        <button class="btn btn-primary" id="btn-imprimir" style="margin-left:auto;">Imprimir / PDF</button>
       </div>
+      <div class="field" id="dp-rango-wrap" style="display:none;">
+        <label>Del — al</label>
+        <div style="display:flex;gap:6px;"><input type="date" id="dp-rango-ini" style="width:130px;"><input type="date" id="dp-rango-fin" style="width:130px;"></div>
+      </div>
+      <div class="field"><label>Presentación</label><select id="dp-presentacion"><option value="">Todas</option></select></div>
+      <button class="btn btn-ghost" id="btn-dp-limpiar">Limpiar</button>
     </div>
 
-    <div id="dash-period-label" style="font-size:15px;color:var(--ink-soft);font-weight:600;margin:16px 0 14px;text-transform:uppercase;letter-spacing:.04em;"></div>
+    <div id="dp-period-label" style="font-size:12.5px;color:var(--ink-soft);font-weight:700;margin:0 0 10px;text-transform:uppercase;letter-spacing:.03em;"></div>
 
-    <div class="hero-metric">
+    <div class="hero">
       <div>
-        <div class="hero-label">Tiempo perdido total</div>
-        <div class="hero-value" id="hero-horas">0.0 hrs</div>
-        <div class="hero-sub" id="hero-sub">0 eventos registrados</div>
+        <div class="hero-label">% Defectuoso del período</div>
+        <div class="hero-value" id="dp-hero-pct">0.00%</div>
+        <div class="hero-sub" id="dp-hero-sub">0 de 0 piezas con defecto</div>
       </div>
       <div class="hero-side">
-        <div class="hero-mini"><span id="hero-promedio">0.0</span><small>Promedio por evento (hrs)</small></div>
-        <div class="hero-mini"><span id="hero-planta-peor">—</span><small>Planta con más tiempo perdido</small></div>
-        <div class="hero-mini"><span id="hero-tipo-peor">—</span><small>Causa principal</small></div>
+        <div class="hero-mini"><span id="dp-hero-produccion">0</span><small>Producción bruta</small></div>
+        <div class="hero-mini"><span id="dp-hero-turnos">0</span><small>Turnos</small></div>
+        <div class="hero-mini"><span id="dp-hero-peor">—</span><small>Peor presentación</small></div>
       </div>
     </div>
 
-    <div class="grid grid-4" style="margin-top:16px;">
-      <div class="kpi"><div class="kpi-label">Eventos registrados</div><div class="kpi-value" id="kpi-eventos">0</div></div>
-      <div class="kpi"><div class="kpi-label">Horas perdidas</div><div class="kpi-value" id="kpi-horas">0</div></div>
-      <div class="kpi"><div class="kpi-label">Promedio hrs/evento</div><div class="kpi-value" id="kpi-promedio">0</div></div>
-      <div class="kpi"><div class="kpi-label">Plantas afectadas</div><div class="kpi-value" id="kpi-plantas">0</div></div>
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-label">Producción bruta</div><div class="kpi-value" id="dp-kpi-produccion">0</div></div>
+      <div class="kpi"><div class="kpi-label">Producción neta</div><div class="kpi-value" id="dp-kpi-neta">0</div></div>
+      <div class="kpi"><div class="kpi-label">Piezas con defecto</div><div class="kpi-value" id="dp-kpi-defectos">0</div></div>
+      <div class="kpi"><div class="kpi-label">% Defectuoso global</div><div class="kpi-value" id="dp-kpi-pct">0%</div></div>
     </div>
 
-    <div class="subtabs dash-print-hide" style="margin-top:18px;">
-      <button class="subtab active" data-subtab="proceso">Por proceso</button>
-      <button class="subtab" data-subtab="pareto">Pareto</button>
-      <button class="subtab" data-subtab="planta">Por planta</button>
-      <button class="subtab" data-subtab="maquinas">Top máquinas</button>
-      <button class="subtab" data-subtab="tendencia">Tendencia</button>
-      <button class="subtab" data-subtab="detalle">Detalle</button>
-    </div>
-
-    <div class="subview active" id="subview-proceso">
-      <div class="panel" style="margin-top:14px;">
-        <div class="panel-title">Desempeño por proceso</div>
-        <p class="panel-hint">Frascos, Stick y Doy Pack lado a lado, en el mismo período — independiente del filtro de planta de arriba.</p>
-        <div class="grid grid-3" id="proceso-cards"></div>
+    <div class="panel dash-print-hide">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+        <div><div class="panel-title">OEE — Eficiencia General del Equipo</div><p class="panel-hint" style="margin:0;">Producción de Doy Pack + tiempos perdidos de la línea Doy Pack, en el período (ignora el filtro de presentación).</p></div>
+        <button class="btn btn-ghost" id="btn-oee-config" style="padding:8px 14px;font-size:12px;">⚙ Configurar tasas ideales</button>
+      </div>
+      <div id="oee-config-panel" style="display:none;margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);">
+        <div class="field" style="max-width:240px;"><label>Horas efectivas por turno</label><input type="number" min="0" step="0.1" id="oee-horas-efectivas"></div>
+        <label style="display:block;margin:10px 0 6px;font-size:10.5px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;">Tasa ideal (piezas/hora) por presentación</label>
+        <div id="oee-tasas-wrap" class="grid3" style="margin-bottom:10px;"></div>
+        <button class="btn btn-primary" id="btn-oee-guardar" style="padding:9px 16px;font-size:12.5px;">Guardar configuración</button>
+        <span id="oee-config-status" style="font-size:11.5px;color:var(--ink-soft);margin-left:8px;"></span>
       </div>
     </div>
 
-    <div class="subview" id="subview-pareto">
-      <div class="panel" style="margin-top:14px;">
-        <div class="panel-title">Pareto de causas</div>
-        <p class="panel-hint">Horas perdidas por tipo de paro y % acumulado.</p>
-        <div class="chart-box" style="height:340px;"><canvas id="chart-pareto"></canvas></div>
+    <div class="hero" style="background:linear-gradient(135deg,#0F1A12,var(--green-dk));">
+      <div>
+        <div class="hero-label">OEE del período</div>
+        <div class="hero-value" id="hero-oee">0.0%</div>
+        <div class="hero-sub" id="hero-oee-sub">Disponibilidad × Rendimiento × Calidad</div>
+      </div>
+      <div class="hero-side">
+        <div class="hero-mini"><span id="oee-disp">0%</span><small>Disponibilidad</small></div>
+        <div class="hero-mini"><span id="oee-rend">0%</span><small>Rendimiento</small></div>
+        <div class="hero-mini"><span id="oee-calidad">0%</span><small>Calidad</small></div>
       </div>
     </div>
+    <p class="panel-hint dash-print-hide" style="margin:-8px 0 14px;" id="oee-detalle-txt"></p>
 
-    <div class="subview" id="subview-planta">
-      <div class="panel" style="margin-top:14px;">
-        <div class="panel-title">Tiempo perdido por planta</div>
-        <p class="panel-hint">Horas acumuladas por Frascos, Stick y Doy Pack.</p>
-        <div class="chart-box" style="height:340px;"><canvas id="chart-planta"></canvas></div>
-      </div>
+    <div class="grid2">
+      <div class="panel"><div class="panel-title">Defectos por tipo</div><p class="panel-hint">Piezas acumuladas por tipo de defecto.</p><div class="chart-box"><canvas id="chart-tipos"></canvas></div></div>
+      <div class="panel"><div class="panel-title">% Defectuoso por presentación</div><p class="panel-hint">Comparación entre presentaciones.</p><div class="chart-box"><canvas id="chart-presentacion"></canvas></div></div>
     </div>
 
-    <div class="subview" id="subview-maquinas">
-      <div class="panel" style="margin-top:14px;">
-        <div class="panel-title">Top máquinas / componentes</div>
-        <p class="panel-hint">Ordenadas de mayor a menor tiempo perdido acumulado.</p>
-        <div id="ranking-maquina"></div>
-      </div>
+    <div class="panel"><div class="panel-title">Ranking de presentaciones</div><p class="panel-hint">De mayor a menor % defectuoso.</p><div id="ranking-presentacion"></div></div>
+
+    <div class="panel">
+      <div class="panel-title" id="tendencia-title">Tendencia de % defectuoso</div>
+      <p class="panel-hint" id="tendencia-hint">Evolución del índice de defecto en el período.</p>
+      <div class="chart-box" style="height:220px;"><canvas id="chart-tendencia"></canvas></div>
+      <div class="legend-row" id="tendencia-legend"></div>
     </div>
 
-    <div class="subview" id="subview-tendencia">
-      <div class="panel" style="margin-top:14px;">
-        <div class="panel-title" id="tendencia-title">Tendencia de tiempo perdido</div>
-        <p class="panel-hint" id="tendencia-hint">Horas perdidas por día en el período.</p>
-        <div class="chart-box" style="height:280px;"><canvas id="chart-tendencia"></canvas></div>
+    <div class="gridcard dash-print-hide">
+      <div class="grid-title-bar"><div class="grid-title">Detalle de registros</div></div>
+      <div class="grid-scroll">
+        <table class="grid">
+          <thead><tr><th>Fecha</th><th>Turno</th><th>Presentación</th><th>Bruta</th><th>Neta</th><th>Sellado</th><th>Codificado</th><th>Fuga</th><th>Peso</th><th>Total def.</th><th>% Def.</th><th>Realizó</th></tr></thead>
+          <tbody id="tbl-detalle"></tbody>
+        </table>
       </div>
-    </div>
-
-    <div class="subview dash-print-hide" id="subview-detalle">
-      <div class="panel" style="margin-top:14px;">
-        <div class="panel-title">Detalle de eventos</div>
-        <div class="table-scroll">
-          <table>
-            <thead><tr><th>Fecha</th><th>Turno</th><th>Planta</th><th>Lote</th><th>Máquina</th><th>Tipo</th><th>Duración</th><th>Operador</th><th>Responsable</th></tr></thead>
-            <tbody id="tbl-detalle"></tbody>
-          </table>
-        </div>
-        <div class="empty" id="detalle-empty" style="display:none;">No hay eventos en el período seleccionado.</div>
-      </div>
+      <div class="grid-empty" id="detalle-empty" style="display:none;">No hay registros en el período.</div>
     </div>
   </div>
 
+  <!-- ===== VIEW: TIEMPOS PERDIDOS GRID ===== -->
+  <div class="view" id="view-tp-grid">
+    <div class="gridcard">
+      <div class="grid-title-bar">
+        <div class="grid-title">Eventos de paro — PSA-FOR-047</div>
+        <div class="grid-count" id="tp-grid-count">0 eventos</div>
+      </div>
+      <div class="grid-scroll">
+        <table class="grid">
+          <thead><tr>
+            <th class="chk"><input type="checkbox" disabled></th>
+            <th>Fecha</th><th>Turno</th><th>Planta</th><th>Máquina</th><th>Tipo</th><th>Duración</th><th>Operador</th><th></th>
+          </tr></thead>
+          <tbody id="tp-grid-body"></tbody>
+        </table>
+      </div>
+      <div class="grid-empty" id="tp-grid-empty" style="display:none;">Aún no hay eventos capturados.</div>
+    </div>
+  </div>
+
+  <!-- ===== VIEW: TIEMPOS PERDIDOS DASHBOARD ===== -->
+  <div class="view" id="view-tp-dash">
+    <div class="filterbar dash-print-hide">
+      <div class="field" style="min-width:150px;"><label>Fecha de referencia</label><input type="date" id="tp-fecha-ref"></div>
+      <div class="field" style="min-width:auto;">
+        <label>Período</label>
+        <div class="period-group">
+          <button class="pbtn active" data-tp-period="dia">Día</button>
+          <button class="pbtn" data-tp-period="semana">Semana</button>
+          <button class="pbtn" data-tp-period="mes">Mes</button>
+          <button class="pbtn" data-tp-period="año">Año</button>
+          <button class="pbtn" data-tp-period="rango">Rango</button>
+        </div>
+      </div>
+      <div class="field" id="tp-rango-wrap" style="display:none;">
+        <label>Del — al</label>
+        <div style="display:flex;gap:6px;"><input type="date" id="tp-rango-ini" style="width:130px;"><input type="date" id="tp-rango-fin" style="width:130px;"></div>
+      </div>
+      <div class="field"><label>Planta</label><select id="tp-planta-filter"><option value="">Todas</option><option>Frascos</option><option>Stick</option><option>Doy pack</option></select></div>
+      <button class="btn btn-ghost" id="btn-tp-limpiar">Limpiar</button>
+    </div>
+
+    <div id="tp-period-label" style="font-size:12.5px;color:var(--ink-soft);font-weight:700;margin:0 0 10px;text-transform:uppercase;letter-spacing:.03em;"></div>
+
+    <div class="hero">
+      <div>
+        <div class="hero-label">Tiempo perdido total</div>
+        <div class="hero-value" id="tp-hero-horas">0.0 hrs</div>
+        <div class="hero-sub" id="tp-hero-sub">0 eventos registrados</div>
+      </div>
+      <div class="hero-side">
+        <div class="hero-mini"><span id="tp-hero-promedio">0.0</span><small>Prom. hrs/evento</small></div>
+        <div class="hero-mini"><span id="tp-hero-planta-peor">—</span><small>Planta con más impacto</small></div>
+        <div class="hero-mini"><span id="tp-hero-tipo-peor">—</span><small>Causa principal</small></div>
+      </div>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-label">Eventos registrados</div><div class="kpi-value" id="tp-kpi-eventos">0</div></div>
+      <div class="kpi"><div class="kpi-label">Horas perdidas</div><div class="kpi-value" id="tp-kpi-horas">0</div></div>
+      <div class="kpi"><div class="kpi-label">Promedio hrs/evento</div><div class="kpi-value" id="tp-kpi-promedio">0</div></div>
+      <div class="kpi"><div class="kpi-label">Plantas afectadas</div><div class="kpi-value" id="tp-kpi-plantas">0</div></div>
+    </div>
+
+    <div class="subtabs dash-print-hide">
+      <button class="stbtn active" data-tp-sub="proceso">Por proceso</button>
+      <button class="stbtn" data-tp-sub="pareto">Pareto</button>
+      <button class="stbtn" data-tp-sub="planta">Por planta</button>
+      <button class="stbtn" data-tp-sub="maquinas">Top máquinas</button>
+      <button class="stbtn" data-tp-sub="tendencia">Tendencia</button>
+      <button class="stbtn" data-tp-sub="detalle">Detalle</button>
+    </div>
+
+    <div class="subview active" id="tp-subview-proceso">
+      <div class="panel"><div class="panel-title">Desempeño por proceso</div><p class="panel-hint">Frascos, Stick y Doy Pack lado a lado, mismo período — independiente del filtro de planta.</p><div class="grid3" id="proceso-cards"></div></div>
+    </div>
+    <div class="subview" id="tp-subview-pareto">
+      <div class="panel"><div class="panel-title">Pareto de causas</div><p class="panel-hint">Horas perdidas por tipo de paro y % acumulado.</p><div class="chart-box" style="height:320px;"><canvas id="chart-pareto"></canvas></div></div>
+    </div>
+    <div class="subview" id="tp-subview-planta">
+      <div class="panel"><div class="panel-title">Tiempo perdido por planta</div><p class="panel-hint">Horas acumuladas por línea.</p><div class="chart-box" style="height:320px;"><canvas id="chart-planta"></canvas></div></div>
+    </div>
+    <div class="subview" id="tp-subview-maquinas">
+      <div class="panel"><div class="panel-title">Top máquinas / componentes</div><p class="panel-hint">De mayor a menor tiempo perdido.</p><div id="ranking-maquina"></div></div>
+    </div>
+    <div class="subview" id="tp-subview-tendencia">
+      <div class="panel"><div class="panel-title" id="tp-tendencia-title">Tendencia de tiempo perdido</div><p class="panel-hint" id="tp-tendencia-hint">Horas perdidas por día.</p><div class="chart-box" style="height:260px;"><canvas id="chart-tendencia-tp"></canvas></div></div>
+    </div>
+    <div class="subview dash-print-hide" id="tp-subview-detalle">
+      <div class="gridcard">
+        <div class="grid-title-bar"><div class="grid-title">Detalle de eventos</div></div>
+        <div class="grid-scroll">
+          <table class="grid">
+            <thead><tr><th>Fecha</th><th>Turno</th><th>Planta</th><th>Lote</th><th>Máquina</th><th>Tipo</th><th>Duración</th><th>Operador</th><th>Responsable</th></tr></thead>
+            <tbody id="tbl-detalle-tp"></tbody>
+          </table>
+        </div>
+        <div class="grid-empty" id="tp-detalle-empty" style="display:none;">No hay eventos en el período.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: NUEVO REGISTRO DOY PACK ===== -->
+<div class="modal-overlay" id="dp-modal-overlay">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-head-title">➕ Nuevo registro de turno — Doy Pack</div><button class="modal-close" id="dp-modal-close">✕</button></div>
+    <div class="modal-tabs">
+      <button class="mtab active" data-dpm-tab="datos">Datos del turno</button>
+      <button class="mtab" data-dpm-tab="produccion">Producción y defectos</button>
+      <button class="mtab" data-dpm-tab="obs">Observaciones</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-pane active" id="dpm-pane-datos">
+        <div class="grid2">
+          <div class="field"><label>Fecha</label><input type="date" id="f-fecha"></div>
+          <div class="field"><label>Turno</label><select id="f-turno"><option>Turno 1</option><option>Turno 2</option><option>Turno 3</option></select></div>
+        </div>
+        <div class="grid2" style="margin-top:12px;">
+          <div class="field">
+            <label>Presentación</label>
+            <select id="f-presentacion">
+              <option value="">Selecciona…</option>
+              <option>28 grs Continental</option><option>32 grs Negro Café</option><option>96 grs Continental</option>
+              <option>120 grs Negro Café</option><option>250 grs Continental</option><option>250 grs</option>
+              <option value="__otra">Otra…</option>
+            </select>
+          </div>
+          <div class="field" id="f-presentacion-otra-wrap" style="display:none;"><label>Especificar presentación</label><input type="text" id="f-presentacion-otra" placeholder="Ej. Doy Pack 750g"></div>
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <label>Realizó</label>
+          <select id="f-realizo"></select>
+          <div id="f-realizo-otro-wrap" style="display:none;margin-top:8px;">
+            <input type="text" id="f-realizo-otro" placeholder="Nombre del nuevo operador">
+            <div style="display:flex;gap:8px;margin-top:6px;"><button type="button" class="btn btn-ghost" id="btn-add-operador" style="padding:7px 14px;font-size:12px;">Agregar</button><button type="button" class="row-del" id="btn-cancel-operador">Cancelar</button></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-pane" id="dpm-pane-produccion">
+        <div class="grid2">
+          <div class="field"><label>Producción neta del turno (piezas buenas)</label><input type="number" min="0" id="f-produccion-neta" placeholder="0"></div>
+          <div class="field"><label>Producción bruta (calculada)</label><input type="text" id="f-produccion" readonly placeholder="0" style="background:#EFF2F1;font-weight:700;color:var(--ink);"></div>
+        </div>
+        <label style="display:block;margin:14px 0 6px;font-size:10.5px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;">Conteo de defectos</label>
+        <div class="grid2" style="row-gap:10px;">
+          <div class="defect-mini"><span><span class="dot" style="background:#C0392B"></span>Mal sellado</span><input type="number" min="0" id="f-d1" placeholder="0" style="margin-top:8px;"></div>
+          <div class="defect-mini"><span><span class="dot" style="background:#D98A1F"></span>Mal codificado</span><input type="number" min="0" id="f-d2" placeholder="0" style="margin-top:8px;"></div>
+          <div class="defect-mini"><span><span class="dot" style="background:#1F8A8C"></span>Fuga de empaque</span><input type="number" min="0" id="f-d3" placeholder="0" style="margin-top:8px;"></div>
+          <div class="defect-mini"><span><span class="dot" style="background:#4A5FA0"></span>Peso fuera de espec.</span><input type="number" min="0" id="f-d4" placeholder="0" style="margin-top:8px;"></div>
+        </div>
+      </div>
+      <div class="modal-pane" id="dpm-pane-obs">
+        <div class="field"><label>Observaciones</label><textarea id="f-obs" placeholder="Opcional" style="min-height:120px;"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" id="dp-modal-cancel">Cancelar</button><button class="btn btn-primary" id="btn-guardar">Guardar registro</button></div>
+  </div>
+</div>
+
+<!-- ===== MODAL: NUEVO EVENTO TIEMPOS PERDIDOS ===== -->
+<div class="modal-overlay" id="tp-modal-overlay">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-head-title">➕ Nuevo evento de paro</div><button class="modal-close" id="tp-modal-close">✕</button></div>
+    <div class="modal-tabs">
+      <button class="mtab active" data-tpm-tab="datos">Datos del evento</button>
+      <button class="mtab" data-tpm-tab="causa">Causa</button>
+      <button class="mtab" data-tpm-tab="resp">Responsables</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-pane active" id="tpm-pane-datos">
+        <div class="grid3">
+          <div class="field"><label>Fecha</label><input type="date" id="tf-fecha"></div>
+          <div class="field"><label>Turno</label><select id="tf-turno"><option>Primero</option><option>Segundo</option><option>Tercero</option></select></div>
+          <div class="field"><label>Planta</label><select id="tf-planta"><option>Frascos</option><option>Stick</option><option>Doy pack</option></select></div>
+        </div>
+        <div class="grid3" style="margin-top:12px;">
+          <div class="field"><label>Lote</label><input type="text" id="tf-lote" placeholder="Ej. 3795LMA"></div>
+          <div class="field"><label>Hora inicial</label><input type="time" id="tf-hora-ini"></div>
+          <div class="field"><label>Hora final</label><input type="time" id="tf-hora-fin"></div>
+        </div>
+        <div class="field" style="margin-top:12px;max-width:220px;"><label>Duración</label><input type="text" id="tf-duracion" readonly placeholder="0.00 hrs" style="background:#EFF2F1;font-weight:700;"></div>
+      </div>
+      <div class="modal-pane" id="tpm-pane-causa">
+        <div class="grid2">
+          <div class="field"><label>Componente / máquina</label><input type="text" id="tf-maquina" placeholder="Ej. Sistema dosificador"></div>
+          <div class="field"><label>Tipo de paro</label><select id="tf-tipo">
+            <option>🧰 Mantenimiento Correctivo</option><option>🔄 Proceso</option><option>✅ Calidad</option>
+            <option>⚙️ Servicios</option><option>💡 Logística</option><option>💡 Otro</option>
+          </select></div>
+        </div>
+        <div class="field" style="margin-top:12px;"><label>Descripción</label><textarea id="tf-desc" placeholder="¿Qué pasó?"></textarea></div>
+        <div class="field" style="margin-top:12px;"><label>Acción de corrección</label><textarea id="tf-accion" placeholder="¿Qué se hizo? (N/A si no aplica)"></textarea></div>
+      </div>
+      <div class="modal-pane" id="tpm-pane-resp">
+        <div class="field">
+          <label>Operador</label>
+          <select id="tf-operador"></select>
+          <div id="tf-operador-otro-wrap" style="display:none;margin-top:8px;">
+            <input type="text" id="tf-operador-otro" placeholder="Nombre del nuevo operador">
+            <div style="display:flex;gap:8px;margin-top:6px;"><button type="button" class="btn btn-ghost" id="btn-add-tp-operador" style="padding:7px 14px;font-size:12px;">Agregar</button><button type="button" class="row-del" id="btn-cancel-tp-operador">Cancelar</button></div>
+          </div>
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <label>Responsable de atender</label>
+          <select id="tf-responsable"></select>
+          <div id="tf-responsable-otro-wrap" style="display:none;margin-top:8px;">
+            <input type="text" id="tf-responsable-otro" placeholder="Nombre del nuevo responsable">
+            <div style="display:flex;gap:8px;margin-top:6px;"><button type="button" class="btn btn-ghost" id="btn-add-tp-responsable" style="padding:7px 14px;font-size:12px;">Agregar</button><button type="button" class="row-del" id="btn-cancel-tp-responsable">Cancelar</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" id="tp-modal-cancel">Cancelar</button><button class="btn btn-primary" id="btn-guardar-tp">Guardar evento</button></div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
 (function(){
-  const TIPO_COLORS = {
-    '🧰 Mantenimiento Correctivo':'#C0392B',
-    '🔄 Proceso':'#D98A1F',
-    '✅ Calidad':'#1F8A8C',
-    '⚙️ Servicios':'#4A5FA0',
-    '💡 Logística':'#7D5BA6',
-    '💡 Otro':'#8A8D91',
-  };
-  const PLANTA_COLORS = {'Frascos':'#4A5FA0','Stick':'#1F8A8C','Doy pack':'#C17817'};
+  /* ============================================================
+     UTILIDADES COMPARTIDAS
+  ============================================================ */
   const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  function fmt(n){ return new Intl.NumberFormat('es-MX').format(Math.round(n)); }
+  function fmtH(n){ return (Math.round(n*100)/100).toLocaleString('es-MX',{minimumFractionDigits:1,maximumFractionDigits:2}); }
+  function pct(n){ return (n*100).toFixed(2) + '%'; }
+  function todayISO(){ return new Date().toISOString().slice(0,10); }
+  function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
+  function isoWeek(dateStr){
+    const d = new Date(dateStr+'T00:00:00');
+    const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay()||7));
+    const y0 = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+    return t.getUTCFullYear()+'-W'+String(Math.ceil((((t-y0)/86400000)+1)/7)).padStart(2,'0');
+  }
+  function isInPeriod(dateStr, refDate, period, rIni, rFin){
+    if(!dateStr) return false;
+    if(period === 'rango') return rIni && rFin && dateStr >= rIni && dateStr <= rFin;
+    if(period === 'dia')    return dateStr === refDate;
+    if(period === 'semana') return isoWeek(dateStr) === isoWeek(refDate);
+    if(period === 'mes')    return dateStr.substring(0,7) === refDate.substring(0,7);
+    if(period === 'año')    return dateStr.substring(0,4) === refDate.substring(0,4);
+    return false;
+  }
+  function getPeriodLabel(refDate, period, rIni, rFin){
+    if(period === 'dia')    return 'Día: ' + refDate;
+    if(period === 'semana') return 'Semana ' + isoWeek(refDate).split('-W')[1] + ' · ' + isoWeek(refDate).split('-')[0];
+    if(period === 'mes')    return MESES[Number(refDate.substring(5,7))-1] + ' ' + refDate.substring(0,4);
+    if(period === 'año')    return 'Año ' + refDate.substring(0,4);
+    if(period === 'rango')  return rIni && rFin ? (rIni + ' al ' + rFin) : 'Selecciona un rango';
+    return '';
+  }
+  function duracionHrs(horaIni, horaFin){
+    if(!horaIni || !horaFin) return 0;
+    const [h1,m1] = horaIni.split(':').map(Number);
+    const [h2,m2] = horaFin.split(':').map(Number);
+    let mins = (h2*60+m2) - (h1*60+m1);
+    if(mins < 0) mins += 24*60;
+    return mins/60;
+  }
 
-  let records = [];
-  let operadores = ['JERC'];
-  let responsables = ['JAP'];
-
-  // ---------- Firebase (mismo proyecto que Panel Gerencial / Doy Pack) ----------
+  /* ============================================================
+     FIREBASE (mismo proyecto para ambos documentos)
+  ============================================================ */
   const FB_KEY = 'AIzaSyBjcblj8HNjK8aNZc5PGCTuUYYGopkAmHk';
   const FB_PID = 'upav-docente';
   const FB_BASE = `https://firestore.googleapis.com/v1/projects/${FB_PID}/databases/(default)/documents/`;
-  const DOC_PATH = 'tiempos_perdidos/datos';
+  const DOC_DP = 'doypack/datos';
+  const DOC_TP = 'tiempos_perdidos/datos';
 
   function toFSValue(v){
     if(v === null || v === undefined) return {nullValue:null};
@@ -390,465 +602,833 @@
   function objToFS(obj){ const fields={}; Object.keys(obj).forEach(k=>fields[k]=toFSValue(obj[k])); return {fields}; }
   function fsToObj(d){ const o={}, f=d.fields||{}; Object.keys(f).forEach(k=>o[k]=fromFSValue(f[k])); return o; }
 
-  async function fbGetDoc(){
-    const url = FB_BASE + DOC_PATH + '?key=' + FB_KEY;
+  async function fbGet(docPath){
+    const url = FB_BASE + docPath + '?key=' + FB_KEY;
     const r = await fetch(url, {signal: AbortSignal.timeout(10000)});
     if(r.status === 404) return null;
     if(!r.ok) throw new Error('HTTP ' + r.status);
     return fsToObj(await r.json());
   }
-  async function fbSaveDoc(data){
-    const url = FB_BASE + DOC_PATH + '?key=' + FB_KEY;
+  async function fbSave(docPath, data){
+    const url = FB_BASE + docPath + '?key=' + FB_KEY;
     const r = await fetch(url, {method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify(objToFS(data))});
     if(!r.ok) throw new Error('HTTP ' + r.status);
   }
-
-  let _remoteDoc = { records: [], operadores: operadores.slice(), responsables: responsables.slice(), ts: 0 };
-  let _lastTs = 0;
 
   function setSyncStatus(txt, ok){
     const dot = document.getElementById('sync-dot');
     const label = document.getElementById('sync-txt');
     if(label) label.textContent = txt;
-    if(dot) dot.style.background = ok===true ? '#3D7A5C' : ok===false ? '#C17817' : '#94a3b8';
+    if(dot) dot.style.background = ok===true ? '#2E8B45' : ok===false ? '#D98A1F' : '#C0392B';
   }
 
-  async function fetchAndApplyDoc(){
-    const d = await fbGetDoc();
+  /* ============================================================
+     ===================  DOY PACK  =============================
+  ============================================================ */
+  const DEFECT_KEYS = ['d1','d2','d3','d4'];
+  const DEFECT_LABELS = {d1:'Mal sellado', d2:'Mal codificado', d3:'Fuga de empaque', d4:'Peso fuera de espec.'};
+  const DEFECT_COLORS = {d1:'#C0392B', d2:'#D98A1F', d3:'#1F8A8C', d4:'#4A5FA0'};
+  const TREND_COLORS = ['#2E8B45','#4A5FA0','#1F8A8C','#C0392B','#8A8D91','#D98A1F'];
+  const DEFAULT_TASAS = {'28 grs Continental':840,'32 grs Negro Café':780,'96 grs Continental':540,'120 grs Negro Café':420,'250 grs Continental':360,'250 grs':360};
+  const DEFAULT_HORAS_EFECTIVAS = 6;
+  const TURNO_MAP = {'Turno 1':'Primero','Turno 2':'Segundo','Turno 3':'Tercero'};
+
+  let dpRecords = [];
+  let operadores = ['Jose Eduardo Ramirez Castro','Jorge Alexis Tiburcio Romero','Alejandro Ruiz Flores'];
+  let tasasIdeales = {...DEFAULT_TASAS};
+  let horasEfectivas = DEFAULT_HORAS_EFECTIVAS;
+  let chartTipos, chartPresentacion, chartTendencia;
+  let dpRemote = { records:[], operadores: operadores.slice(), tasasIdeales:{...tasasIdeales}, horasEfectivas, ts:0 };
+  let dpLastTs = 0;
+
+  function totalDefects(r){ return DEFECT_KEYS.reduce((s,k)=> s + (Number(r[k])||0), 0); }
+  function pctDef(r){ const p = Number(r.produccion)||0; return p>0 ? totalDefects(r)/p : 0; }
+  function netaDe(r){ return Math.max((Number(r.produccion)||0) - totalDefects(r), 0); }
+
+  async function dpFetchAndApply(){
+    const d = await fbGet(DOC_DP);
     if(!d){
-      _remoteDoc = { records: [], operadores: operadores.slice(), responsables: responsables.slice(), ts: Date.now() };
-      await fbSaveDoc(_remoteDoc);
+      dpRemote = { records:[], operadores: operadores.slice(), tasasIdeales:{...tasasIdeales}, horasEfectivas, ts: Date.now() };
+      await fbSave(DOC_DP, dpRemote);
     }else{
-      _remoteDoc = {
+      dpRemote = {
         records: Array.isArray(d.records) ? d.records : [],
         operadores: Array.isArray(d.operadores) && d.operadores.length ? d.operadores : operadores.slice(),
-        responsables: Array.isArray(d.responsables) && d.responsables.length ? d.responsables : responsables.slice(),
+        tasasIdeales: (d.tasasIdeales && Object.keys(d.tasasIdeales).length) ? d.tasasIdeales : {...tasasIdeales},
+        horasEfectivas: Number(d.horasEfectivas) > 0 ? Number(d.horasEfectivas) : horasEfectivas,
         ts: Number(d.ts)||0
       };
     }
-    operadores = _remoteDoc.operadores;
-    responsables = _remoteDoc.responsables;
-    records = _remoteDoc.records.slice();
-    records.sort((a,b)=> (a.fecha+a.horaIni).localeCompare(b.fecha+b.horaIni));
-    _lastTs = _remoteDoc.ts;
+    operadores = dpRemote.operadores;
+    tasasIdeales = dpRemote.tasasIdeales;
+    horasEfectivas = dpRemote.horasEfectivas;
+    dpRecords = dpRemote.records.map(r=>({...r,_key:r.id}));
+    dpRecords.sort((a,b)=> (a.fecha+a.turno).localeCompare(b.fecha+b.turno));
+    dpLastTs = dpRemote.ts;
+  }
+  async function dpSaveRecord(rec){
+    const id = rec.fecha + '_' + rec.turno.replace(/\s+/g,'') + '_' + Date.now();
+    dpRemote.records = [...dpRemote.records, {...rec, id}];
+    dpRemote.ts = Date.now();
+    await fbSave(DOC_DP, dpRemote);
+    dpLastTs = dpRemote.ts;
+  }
+  async function dpDeleteRecord(key){
+    dpRemote.records = dpRemote.records.filter(r=> r.id !== key);
+    dpRemote.ts = Date.now();
+    await fbSave(DOC_DP, dpRemote);
+    dpLastTs = dpRemote.ts;
+  }
+  async function dpUpdateRecord(key, rec){
+    dpRemote.records = dpRemote.records.map(r=> r.id === key ? {...rec, id:key} : r);
+    dpRemote.ts = Date.now();
+    await fbSave(DOC_DP, dpRemote);
+    dpLastTs = dpRemote.ts;
+  }
+  async function dpSaveOperadores(){
+    dpRemote.operadores = operadores; dpRemote.ts = Date.now();
+    await fbSave(DOC_DP, dpRemote); dpLastTs = dpRemote.ts;
   }
 
+  function populateOperadorSelect(selectEl, selected){
+    selectEl.innerHTML = operadores.slice().sort((a,b)=>a.localeCompare(b)).map(o=>`<option value="${o}">${o}</option>`).join('') + '<option value="__nuevo">+ Agregar operador…</option>';
+    if(selected && operadores.includes(selected)) selectEl.value = selected;
+  }
+  const selRealizo = document.getElementById('f-realizo');
+  const realizoOtroWrap = document.getElementById('f-realizo-otro-wrap');
+  const realizoOtroInput = document.getElementById('f-realizo-otro');
+  populateOperadorSelect(selRealizo);
+  selRealizo.addEventListener('change', ()=>{
+    if(selRealizo.value === '__nuevo'){ realizoOtroWrap.style.display='block'; realizoOtroInput.value=''; realizoOtroInput.focus(); }
+    else realizoOtroWrap.style.display='none';
+  });
+  document.getElementById('btn-cancel-operador').addEventListener('click', ()=>{ realizoOtroWrap.style.display='none'; selRealizo.value = operadores[0]||''; });
+  document.getElementById('btn-add-operador').addEventListener('click', async ()=>{
+    const name = realizoOtroInput.value.trim();
+    if(!name){ showToast('Escribe el nombre del operador'); return; }
+    if(!operadores.some(o=>o.toLowerCase()===name.toLowerCase())){ operadores.push(name); await dpSaveOperadores(); }
+    populateOperadorSelect(selRealizo, name); realizoOtroWrap.style.display='none';
+    showToast('Operador agregado');
+  });
+
+  const selPresentacion = document.getElementById('f-presentacion');
+  const otraWrap = document.getElementById('f-presentacion-otra-wrap');
+  selPresentacion.addEventListener('change', ()=>{ otraWrap.style.display = selPresentacion.value === '__otra' ? 'block' : 'none'; });
+  document.getElementById('f-fecha').value = todayISO();
+
+  function actualizarNeta(){
+    const neta = Number(document.getElementById('f-produccion-neta').value)||0;
+    const d1 = Number(document.getElementById('f-d1').value)||0, d2 = Number(document.getElementById('f-d2').value)||0;
+    const d3 = Number(document.getElementById('f-d3').value)||0, d4 = Number(document.getElementById('f-d4').value)||0;
+    document.getElementById('f-produccion').value = fmt(neta + d1+d2+d3+d4) + ' pzas';
+  }
+  ['f-produccion-neta','f-d1','f-d2','f-d3','f-d4'].forEach(id=> document.getElementById(id).addEventListener('input', actualizarNeta));
+
+  function dpRefreshGrid(){
+    const tbody = document.getElementById('dp-grid-body');
+    tbody.innerHTML = '';
+    const sorted = [...dpRecords].sort((a,b)=> b._key.localeCompare(a._key));
+    document.getElementById('dp-grid-count').textContent = sorted.length + ' registro' + (sorted.length!==1?'s':'');
+    document.getElementById('dp-grid-empty').style.display = sorted.length ? 'none':'block';
+    for(const r of sorted){
+      const p = pctDef(r);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td><input type="checkbox"></td><td>${r.fecha}</td><td>${r.turno}</td><td>${r.presentacion}</td>
+        <td>${fmt(r.produccion)}</td><td>${fmt(netaDe(r))}</td><td>${fmt(totalDefects(r))}</td>
+        <td><span class="pill ${p>0.02?'pill-warn':'pill-ok'}">${pct(p)}</span></td><td>${r.realizo||'—'}</td>
+        <td style="display:flex;gap:10px;"><button class="row-edit" data-edit="${r._key}">Editar</button><button class="row-del" data-del="${r._key}">Eliminar</button></td>`;
+      tbody.appendChild(tr);
+    }
+    tbody.querySelectorAll('[data-del]').forEach(btn=>{
+      btn.addEventListener('click', async (e)=>{
+        await dpDeleteRecord(e.target.getAttribute('data-del'));
+        await dpFetchAndApply(); dpRefreshGrid(); await dpRefreshAll();
+        showToast('Registro eliminado');
+      });
+    });
+    tbody.querySelectorAll('[data-edit]').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        openDpModal(e.target.getAttribute('data-edit'));
+      });
+    });
+  }
+
+  document.getElementById('btn-guardar').addEventListener('click', async ()=>{
+    const fecha = document.getElementById('f-fecha').value;
+    const turno = document.getElementById('f-turno').value;
+    let presentacion = selPresentacion.value;
+    if(presentacion === '__otra') presentacion = document.getElementById('f-presentacion-otra').value.trim();
+    const netaCapturada = Number(document.getElementById('f-produccion-neta').value)||0;
+    let realizo = selRealizo.value; if(realizo === '__nuevo') realizo = '';
+    const obs = document.getElementById('f-obs').value.trim();
+    const d1 = Number(document.getElementById('f-d1').value)||0, d2 = Number(document.getElementById('f-d2').value)||0;
+    const d3 = Number(document.getElementById('f-d3').value)||0, d4 = Number(document.getElementById('f-d4').value)||0;
+    const produccion = netaCapturada + (d1+d2+d3+d4);
+
+    if(!fecha){ showToast('Indica la fecha del turno'); return; }
+    if(!presentacion){ showToast('Indica la presentación'); return; }
+    if(netaCapturada <= 0){ showToast('Indica la producción neta del turno'); return; }
+    if(!realizo){ showToast('Indica quién realizó el registro'); return; }
+
+    const rec = {fecha, turno, presentacion, produccion, realizo, obs, d1, d2, d3, d4};
+    const btn = document.getElementById('btn-guardar');
+    btn.disabled = true; btn.textContent = 'Guardando…';
+    try{
+      if(dpEditingId){
+        await dpUpdateRecord(dpEditingId, rec);
+      }else{
+        await dpSaveRecord(rec);
+      }
+      await dpFetchAndApply();
+      dpRefreshGrid(); await dpRefreshAll();
+      showToast(dpEditingId ? 'Registro actualizado' : 'Registro guardado');
+      closeDpModal();
+      ['f-produccion-neta','f-obs','f-d1','f-d2','f-d3','f-d4'].forEach(id=> document.getElementById(id).value = '');
+      document.getElementById('f-produccion').value = '';
+      selPresentacion.value = ''; otraWrap.style.display = 'none';
+    }catch(e){ console.error(e); showToast('No se pudo guardar. Intenta de nuevo.'); }
+    finally{ btn.disabled = false; btn.textContent = 'Guardar registro'; }
+  });
+
+  /* ---- dashboard Doy Pack ---- */
+  let dpPeriod = 'dia', dpRangoIni = null, dpRangoFin = null;
+  function dpSetPeriod(p){
+    dpPeriod = p;
+    document.querySelectorAll('[data-dp-period]').forEach(b=> b.classList.toggle('active', b.dataset.dpPeriod === p));
+    document.getElementById('dp-rango-wrap').style.display = p === 'rango' ? 'flex' : 'none';
+    dpRefreshAll();
+  }
+  document.querySelectorAll('[data-dp-period]').forEach(btn=> btn.addEventListener('click', ()=> dpSetPeriod(btn.dataset.dpPeriod)));
+  document.getElementById('dp-rango-ini').addEventListener('change', ()=>{ dpRangoIni = document.getElementById('dp-rango-ini').value||null; if(dpPeriod==='rango') dpRefreshAll(); });
+  document.getElementById('dp-rango-fin').addEventListener('change', ()=>{ dpRangoFin = document.getElementById('dp-rango-fin').value||null; if(dpPeriod==='rango') dpRefreshAll(); });
+  document.getElementById('dp-fecha-ref').value = todayISO();
+  document.getElementById('btn-print-dp').addEventListener('click', ()=> window.print());
+  document.getElementById('btn-dp-limpiar').addEventListener('click', ()=>{
+    document.getElementById('dp-fecha-ref').value = todayISO();
+    document.getElementById('dp-presentacion').value = '';
+    document.getElementById('dp-rango-ini').value = ''; document.getElementById('dp-rango-fin').value = '';
+    dpRangoIni = null; dpRangoFin = null; dpSetPeriod('dia');
+  });
+
+  function dpPopulatePresFilter(){
+    const sel = document.getElementById('dp-presentacion');
+    const current = sel.value;
+    const set = new Set(dpRecords.map(r=>r.presentacion).filter(Boolean));
+    sel.innerHTML = '<option value="">Todas</option>' + [...set].sort().map(p=>`<option value="${p}">${p}</option>`).join('');
+    sel.value = current && set.has(current) ? current : '';
+  }
+  function dpFilteredRecords(){
+    const refDate = document.getElementById('dp-fecha-ref').value || todayISO();
+    const pres = document.getElementById('dp-presentacion').value;
+    return dpRecords.filter(r=>{
+      if(!isInPeriod(r.fecha, refDate, dpPeriod, dpRangoIni, dpRangoFin)) return false;
+      if(pres && r.presentacion !== pres) return false;
+      return true;
+    });
+  }
+  function dpFilteredForOEE(){
+    const refDate = document.getElementById('dp-fecha-ref').value || todayISO();
+    return dpRecords.filter(r=> isInPeriod(r.fecha, refDate, dpPeriod, dpRangoIni, dpRangoFin));
+  }
+  function dpFilteredTiemposForOEE(){
+    const refDate = document.getElementById('dp-fecha-ref').value || todayISO();
+    return tpRecords.filter(t=> t.planta === 'Doy pack' && isInPeriod(t.fecha, refDate, dpPeriod, dpRangoIni, dpRangoFin));
+  }
+
+  function dpRefreshKPIs(list){
+    const produccion = list.reduce((s,r)=> s + (Number(r.produccion)||0), 0);
+    const defectos = list.reduce((s,r)=> s + totalDefects(r), 0);
+    const p = produccion>0 ? defectos/produccion : 0;
+    document.getElementById('dp-kpi-produccion').innerHTML = fmt(produccion) + ' <small>pzas</small>';
+    document.getElementById('dp-kpi-neta').innerHTML = fmt(Math.max(produccion-defectos,0)) + ' <small>pzas</small>';
+    document.getElementById('dp-kpi-defectos').innerHTML = fmt(defectos) + ' <small>pzas</small>';
+    const pctEl = document.getElementById('dp-kpi-pct'); pctEl.textContent = pct(p); pctEl.className = 'kpi-value ' + (p>0.02?'warn':'');
+    document.getElementById('dp-hero-pct').textContent = pct(p);
+    document.getElementById('dp-hero-sub').textContent = fmt(defectos) + ' de ' + fmt(produccion) + ' piezas con defecto';
+    document.getElementById('dp-hero-produccion').textContent = fmt(produccion);
+    document.getElementById('dp-hero-turnos').textContent = list.length;
+    const byPres = {};
+    for(const r of list){ if(!r.presentacion) continue; if(!byPres[r.presentacion]) byPres[r.presentacion]={prod:0,def:0}; byPres[r.presentacion].prod+=Number(r.produccion)||0; byPres[r.presentacion].def+=totalDefects(r); }
+    let peor=null, peorPct=-1;
+    Object.keys(byPres).forEach(k=>{ const pp = byPres[k].prod>0?byPres[k].def/byPres[k].prod:0; if(pp>peorPct){peorPct=pp;peor=k;} });
+    document.getElementById('dp-hero-peor').textContent = peor || '—';
+    document.getElementById('dp-period-label').textContent = getPeriodLabel(document.getElementById('dp-fecha-ref').value||todayISO(), dpPeriod, dpRangoIni, dpRangoFin) + (document.getElementById('dp-presentacion').value? ' · '+document.getElementById('dp-presentacion').value : '');
+  }
+
+  function dpRefreshRanking(list){
+    const el = document.getElementById('ranking-presentacion');
+    const byPres = {};
+    for(const r of list){ if(!r.presentacion) continue; if(!byPres[r.presentacion]) byPres[r.presentacion]={prod:0,def:0}; byPres[r.presentacion].prod+=Number(r.produccion)||0; byPres[r.presentacion].def+=totalDefects(r); }
+    const rows = Object.keys(byPres).map(k=>({name:k, pct: byPres[k].prod>0?byPres[k].def/byPres[k].prod:0})).sort((a,b)=>b.pct-a.pct);
+    if(!rows.length){ el.innerHTML = '<div class="empty">Sin datos en el período.</div>'; return; }
+    const maxPct = Math.max(...rows.map(r=>r.pct), 0.0001);
+    el.innerHTML = rows.map(r=>{
+      const width = Math.max((r.pct/maxPct)*100,3);
+      const color = r.pct>0.02 ? '#C0392B' : '#2E8B45';
+      return `<div class="rank-row"><div class="rank-name">${r.name}</div><div class="rank-bar-wrap"><div class="rank-bar" style="width:${width}%;background:${color};"></div></div><div class="rank-val" style="color:${color};">${pct(r.pct)}</div></div>`;
+    }).join('');
+  }
+
+  function dpRefreshChartTipos(list){
+    const totals = DEFECT_KEYS.map(k=> list.reduce((s,r)=> s + (Number(r[k])||0),0));
+    const ctx = document.getElementById('chart-tipos').getContext('2d');
+    const data = { labels: DEFECT_KEYS.map(k=>DEFECT_LABELS[k]), datasets:[{data:totals, backgroundColor: DEFECT_KEYS.map(k=>DEFECT_COLORS[k]), borderRadius:6, maxBarThickness:56}] };
+    if(chartTipos){ chartTipos.data=data; chartTipos.update(); return; }
+    chartTipos = new Chart(ctx, {type:'bar', data, options:{ plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.parsed.y)+' pzas'}}}, scales:{y:{beginAtZero:true,ticks:{precision:0},grid:{color:'#EEF1F0'}},x:{grid:{display:false}}} }});
+  }
+  function dpRefreshChartPresentacion(list){
+    const byPres = {};
+    for(const r of list){ if(!r.presentacion) continue; if(!byPres[r.presentacion]) byPres[r.presentacion]={prod:0,def:0}; byPres[r.presentacion].prod+=Number(r.produccion)||0; byPres[r.presentacion].def+=totalDefects(r); }
+    const labels = Object.keys(byPres).sort();
+    const values = labels.map(l=> byPres[l].prod>0 ? byPres[l].def/byPres[l].prod*100 : 0);
+    const ctx = document.getElementById('chart-presentacion').getContext('2d');
+    const data = { labels, datasets:[{data:values, backgroundColor:'#2E8B45', borderRadius:6, maxBarThickness:56}] };
+    if(chartPresentacion){ chartPresentacion.data=data; chartPresentacion.update(); return; }
+    chartPresentacion = new Chart(ctx, {type:'bar', data, options:{ plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y.toFixed(2)+'%'}}}, scales:{y:{beginAtZero:true,ticks:{callback:v=>v+'%'},grid:{color:'#EEF1F0'}},x:{grid:{display:false}}} }});
+  }
+  function dpRefreshChartTendencia(list){
+    const byDatePres = {}; const presSet = new Set();
+    const bucketKey = f=> dpPeriod==='año' ? f.substring(0,7) : f;
+    for(const r of list){
+      const key = bucketKey(r.fecha); presSet.add(r.presentacion||'Sin presentación');
+      byDatePres[key] = byDatePres[key]||{}; const pk = r.presentacion||'Sin presentación';
+      byDatePres[key][pk] = byDatePres[key][pk]||{prod:0,def:0}; byDatePres[key][pk].prod+=Number(r.produccion)||0; byDatePres[key][pk].def+=totalDefects(r);
+    }
+    const dates = Object.keys(byDatePres).sort();
+    const dateLabels = dates.map(d=> dpPeriod==='año' ? MESES[Number(d.substring(5,7))-1].slice(0,3) : d);
+    const presList = [...presSet].sort();
+    const datasets = presList.map((p,i)=>({label:p, data: dates.map(d=>{const c=byDatePres[d][p]; return c&&c.prod>0? +(c.def/c.prod*100).toFixed(2):null;}), borderColor:TREND_COLORS[i%TREND_COLORS.length], backgroundColor:TREND_COLORS[i%TREND_COLORS.length], spanGaps:true, tension:.3, pointRadius:3}));
+    document.getElementById('tendencia-title').textContent = dpPeriod==='año' ? 'Tendencia mensual de % defectuoso' : 'Tendencia de % defectuoso';
+    document.getElementById('tendencia-hint').textContent = dpPeriod==='año' ? 'Evolución mes a mes.' : 'Evolución en el período.';
+    const ctx = document.getElementById('chart-tendencia').getContext('2d');
+    const data = { labels: dateLabels, datasets };
+    if(chartTendencia){ chartTendencia.data=data; chartTendencia.update(); }
+    else{ chartTendencia = new Chart(ctx, {type:'line', data, options:{ plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.parsed.y+'%'}}}, scales:{y:{beginAtZero:true,ticks:{callback:v=>v+'%'},grid:{color:'#EEF1F0'}},x:{grid:{display:false}}} }}); }
+    document.getElementById('tendencia-legend').innerHTML = presList.map((p,i)=>`<span><span class="dot" style="background:${TREND_COLORS[i%TREND_COLORS.length]}"></span>${p}</span>`).join('');
+  }
+  function dpRefreshDetalle(list){
+    const tbody = document.getElementById('tbl-detalle'); tbody.innerHTML='';
+    const sorted = [...list].sort((a,b)=> b._key.localeCompare(a._key));
+    document.getElementById('detalle-empty').style.display = sorted.length?'none':'block';
+    for(const r of sorted){
+      const p = pctDef(r); const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${r.fecha}</td><td>${r.turno}</td><td>${r.presentacion}</td><td>${fmt(r.produccion)}</td><td>${fmt(netaDe(r))}</td>
+        <td>${fmt(r.d1)}</td><td>${fmt(r.d2)}</td><td>${fmt(r.d3)}</td><td>${fmt(r.d4)}</td><td>${fmt(totalDefects(r))}</td>
+        <td><span class="pill ${p>0.02?'pill-warn':'pill-ok'}">${pct(p)}</span></td><td>${r.realizo||'—'}</td>`;
+      tbody.appendChild(tr);
+    }
+  }
+
+  function dpComputeOEE(list){
+    const turnosUnicos = new Set(list.map(r=> r.fecha+'|'+r.turno));
+    const tiempoProgramado = turnosUnicos.size * horasEfectivas;
+    const tiempos = dpFilteredTiemposForOEE();
+    const tiempoPerdido = tiempos.reduce((s,t)=> s + duracionHrs(t.horaIni, t.horaFin), 0);
+    const tiempoOperativo = Math.max(tiempoProgramado - tiempoPerdido, 0);
+    const disponibilidad = tiempoProgramado>0 ? tiempoOperativo/tiempoProgramado : 0;
+    const brutaTotal = list.reduce((s,r)=> s+(Number(r.produccion)||0),0);
+    const netaTotal = list.reduce((s,r)=> s+netaDe(r),0);
+    const calidad = brutaTotal>0 ? netaTotal/brutaTotal : 0;
+    let tiempoIdealHrs = 0;
+    for(const r of list){ const tasa = tasasIdeales[r.presentacion]||0; if(tasa>0) tiempoIdealHrs += (Number(r.produccion)||0)/tasa; }
+    const rendimiento = tiempoOperativo>0 ? Math.min(tiempoIdealHrs/tiempoOperativo,1) : 0;
+    const oee = disponibilidad*rendimiento*calidad;
+    document.getElementById('hero-oee').textContent = pct(oee);
+    document.getElementById('oee-disp').textContent = pct(disponibilidad);
+    document.getElementById('oee-rend').textContent = pct(rendimiento);
+    document.getElementById('oee-calidad').textContent = pct(calidad);
+    document.getElementById('oee-detalle-txt').textContent = `Tiempo programado: ${tiempoProgramado.toFixed(1)} hrs · Tiempo perdido: ${tiempoPerdido.toFixed(1)} hrs · Tiempo operativo: ${tiempoOperativo.toFixed(1)} hrs · ${turnosUnicos.size} turno${turnosUnicos.size!==1?'s':''}.`;
+  }
+  function renderOeeConfigPanel(){
+    const wrap = document.getElementById('oee-tasas-wrap');
+    const presSet = new Set([...Object.keys(tasasIdeales), ...dpRecords.map(r=>r.presentacion).filter(Boolean)]);
+    wrap.innerHTML = [...presSet].sort().map(p=>`<div class="field"><label>${p}</label><input type="number" min="0" class="oee-tasa-input" data-pres="${p}" value="${tasasIdeales[p]||''}" placeholder="pzas/hora"></div>`).join('');
+    document.getElementById('oee-horas-efectivas').value = horasEfectivas;
+  }
+  document.getElementById('btn-oee-config').addEventListener('click', ()=>{
+    const panel = document.getElementById('oee-config-panel');
+    const show = panel.style.display === 'none'; panel.style.display = show?'block':'none';
+    if(show) renderOeeConfigPanel();
+  });
+  document.getElementById('btn-oee-guardar').addEventListener('click', async ()=>{
+    horasEfectivas = Number(document.getElementById('oee-horas-efectivas').value)||horasEfectivas;
+    const nuevasTasas = {};
+    document.querySelectorAll('.oee-tasa-input').forEach(inp=>{ const v=Number(inp.value)||0; if(v>0) nuevasTasas[inp.dataset.pres]=v; });
+    tasasIdeales = nuevasTasas;
+    dpRemote.horasEfectivas = horasEfectivas; dpRemote.tasasIdeales = tasasIdeales; dpRemote.ts = Date.now();
+    const status = document.getElementById('oee-config-status'); status.textContent = 'Guardando…';
+    try{ await fbSave(DOC_DP, dpRemote); dpLastTs = dpRemote.ts; status.textContent = 'Configuración guardada ✓'; await dpRefreshAll(); }
+    catch(e){ status.textContent = 'No se pudo guardar.'; }
+  });
+
+  async function dpRefreshAll(){
+    dpPopulatePresFilter();
+    const list = dpFilteredRecords();
+    dpRefreshKPIs(list); dpRefreshRanking(list); dpComputeOEE(dpFilteredForOEE());
+    dpRefreshChartTipos(list); dpRefreshChartPresentacion(list); dpRefreshChartTendencia(list); dpRefreshDetalle(list);
+    dpRefreshGrid();
+  }
+
+  /* ============================================================
+     ================  TIEMPOS PERDIDOS  ========================
+  ============================================================ */
+  const TIPO_COLORS = {'🧰 Mantenimiento Correctivo':'#C0392B','🔄 Proceso':'#D98A1F','✅ Calidad':'#1F8A8C','⚙️ Servicios':'#4A5FA0','💡 Logística':'#7D5BA6','💡 Otro':'#8A8D91'};
+  const PLANTA_COLORS = {'Frascos':'#4A5FA0','Stick':'#1F8A8C','Doy pack':'#2E8B45'};
+  let tpRecords = [];
+  let tpOperadores = ['JERC'];
+  let tpResponsables = ['JAP'];
+  let chartPareto, chartPlanta, chartTendenciaTP;
+  let tpRemote = { records:[], operadores: tpOperadores.slice(), responsables: tpResponsables.slice(), ts:0 };
+  let tpLastTs = 0;
+
+  async function tpFetchAndApply(){
+    const d = await fbGet(DOC_TP);
+    if(!d){
+      tpRemote = { records:[], operadores: tpOperadores.slice(), responsables: tpResponsables.slice(), ts: Date.now() };
+      await fbSave(DOC_TP, tpRemote);
+    }else{
+      tpRemote = {
+        records: Array.isArray(d.records) ? d.records : [],
+        operadores: Array.isArray(d.operadores) && d.operadores.length ? d.operadores : tpOperadores.slice(),
+        responsables: Array.isArray(d.responsables) && d.responsables.length ? d.responsables : tpResponsables.slice(),
+        ts: Number(d.ts)||0
+      };
+    }
+    tpOperadores = tpRemote.operadores; tpResponsables = tpRemote.responsables;
+    tpRecords = tpRemote.records.slice();
+    tpRecords.sort((a,b)=> (a.fecha+a.horaIni).localeCompare(b.fecha+b.horaIni));
+    tpLastTs = tpRemote.ts;
+  }
+  async function tpSaveOperadores(){ tpRemote.operadores = tpOperadores; tpRemote.ts = Date.now(); await fbSave(DOC_TP, tpRemote); tpLastTs = tpRemote.ts; }
+  async function tpSaveResponsables(){ tpRemote.responsables = tpResponsables; tpRemote.ts = Date.now(); await fbSave(DOC_TP, tpRemote); tpLastTs = tpRemote.ts; }
+  async function tpSaveRecord(rec){
+    const id = rec.fecha+'_'+rec.horaIni.replace(':','')+'_'+Date.now();
+    tpRemote.records = [...tpRemote.records, {...rec, id}]; tpRemote.ts = Date.now();
+    await fbSave(DOC_TP, tpRemote); tpLastTs = tpRemote.ts;
+  }
+  async function tpDeleteRecord(id){
+    tpRemote.records = tpRemote.records.filter(r=> r.id !== id); tpRemote.ts = Date.now();
+    await fbSave(DOC_TP, tpRemote); tpLastTs = tpRemote.ts;
+  }
+  async function tpUpdateRecord(id, rec){
+    tpRemote.records = tpRemote.records.map(r=> r.id === id ? {...rec, id} : r);
+    tpRemote.ts = Date.now();
+    await fbSave(DOC_TP, tpRemote); tpLastTs = tpRemote.ts;
+  }
+
+  function populateSelectTP(selectEl, list, selected){
+    selectEl.innerHTML = list.slice().sort((a,b)=>a.localeCompare(b)).map(o=>`<option value="${o}">${o}</option>`).join('') + '<option value="__nuevo">+ Agregar…</option>';
+    if(selected && list.includes(selected)) selectEl.value = selected;
+  }
+  const selTfOperador = document.getElementById('tf-operador');
+  const tfOperadorOtroWrap = document.getElementById('tf-operador-otro-wrap');
+  const tfOperadorOtroInput = document.getElementById('tf-operador-otro');
+  populateSelectTP(selTfOperador, tpOperadores);
+  selTfOperador.addEventListener('change', ()=>{
+    if(selTfOperador.value==='__nuevo'){ tfOperadorOtroWrap.style.display='block'; tfOperadorOtroInput.value=''; tfOperadorOtroInput.focus(); } else tfOperadorOtroWrap.style.display='none';
+  });
+  document.getElementById('btn-cancel-tp-operador').addEventListener('click', ()=>{ tfOperadorOtroWrap.style.display='none'; selTfOperador.value = tpOperadores[0]||''; });
+  document.getElementById('btn-add-tp-operador').addEventListener('click', async ()=>{
+    const name = tfOperadorOtroInput.value.trim(); if(!name){ showToast('Escribe el nombre'); return; }
+    if(!tpOperadores.some(o=>o.toLowerCase()===name.toLowerCase())){ tpOperadores.push(name); await tpSaveOperadores(); }
+    populateSelectTP(selTfOperador, tpOperadores, name); tfOperadorOtroWrap.style.display='none'; showToast('Operador agregado');
+  });
+
+  const selTfResponsable = document.getElementById('tf-responsable');
+  const tfResponsableOtroWrap = document.getElementById('tf-responsable-otro-wrap');
+  const tfResponsableOtroInput = document.getElementById('tf-responsable-otro');
+  populateSelectTP(selTfResponsable, tpResponsables);
+  selTfResponsable.addEventListener('change', ()=>{
+    if(selTfResponsable.value==='__nuevo'){ tfResponsableOtroWrap.style.display='block'; tfResponsableOtroInput.value=''; tfResponsableOtroInput.focus(); } else tfResponsableOtroWrap.style.display='none';
+  });
+  document.getElementById('btn-cancel-tp-responsable').addEventListener('click', ()=>{ tfResponsableOtroWrap.style.display='none'; selTfResponsable.value = tpResponsables[0]||''; });
+  document.getElementById('btn-add-tp-responsable').addEventListener('click', async ()=>{
+    const name = tfResponsableOtroInput.value.trim(); if(!name){ showToast('Escribe el nombre'); return; }
+    if(!tpResponsables.some(o=>o.toLowerCase()===name.toLowerCase())){ tpResponsables.push(name); await tpSaveResponsables(); }
+    populateSelectTP(selTfResponsable, tpResponsables, name); tfResponsableOtroWrap.style.display='none'; showToast('Responsable agregado');
+  });
+
+  document.getElementById('tf-fecha').value = todayISO();
+  function tpActualizarDuracion(){
+    const ini = document.getElementById('tf-hora-ini').value, fin = document.getElementById('tf-hora-fin').value;
+    document.getElementById('tf-duracion').value = (ini&&fin) ? fmtH(duracionHrs(ini,fin))+' hrs' : '';
+  }
+  document.getElementById('tf-hora-ini').addEventListener('change', tpActualizarDuracion);
+  document.getElementById('tf-hora-fin').addEventListener('change', tpActualizarDuracion);
+
+  function tpRefreshGrid(){
+    const tbody = document.getElementById('tp-grid-body'); tbody.innerHTML='';
+    const sorted = [...tpRecords].sort((a,b)=> (b.fecha+b.horaIni).localeCompare(a.fecha+a.horaIni));
+    document.getElementById('tp-grid-count').textContent = sorted.length + ' evento' + (sorted.length!==1?'s':'');
+    document.getElementById('tp-grid-empty').style.display = sorted.length?'none':'block';
+    for(const r of sorted){
+      const col = TIPO_COLORS[r.tipo]||'#8A8D91'; const tr = document.createElement('tr');
+      tr.innerHTML = `<td><input type="checkbox"></td><td>${r.fecha}</td><td>${r.turno}</td><td>${r.planta}</td><td>${r.maquina}</td>
+        <td><span class="pill" style="background:${col}22;color:${col};">${r.tipo}</span></td><td>${fmtH(duracionHrs(r.horaIni,r.horaFin))} hrs</td>
+        <td>${r.operador||'—'}</td><td style="display:flex;gap:10px;"><button class="row-edit" data-edit="${r.id}">Editar</button><button class="row-del" data-del="${r.id}">Eliminar</button></td>`;
+      tbody.appendChild(tr);
+    }
+    tbody.querySelectorAll('[data-del]').forEach(btn=>{
+      btn.addEventListener('click', async (e)=>{
+        await tpDeleteRecord(e.target.getAttribute('data-del'));
+        await tpFetchAndApply(); tpRefreshGrid(); await tpRefreshAll();
+        showToast('Evento eliminado');
+      });
+    });
+    tbody.querySelectorAll('[data-edit]').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        openTpModal(e.target.getAttribute('data-edit'));
+      });
+    });
+  }
+
+  document.getElementById('btn-guardar-tp').addEventListener('click', async ()=>{
+    const fecha = document.getElementById('tf-fecha').value, turno = document.getElementById('tf-turno').value, planta = document.getElementById('tf-planta').value;
+    const lote = document.getElementById('tf-lote').value.trim();
+    const horaIni = document.getElementById('tf-hora-ini').value, horaFin = document.getElementById('tf-hora-fin').value;
+    const maquina = document.getElementById('tf-maquina').value.trim(), tipo = document.getElementById('tf-tipo').value;
+    const desc = document.getElementById('tf-desc').value.trim(), accion = document.getElementById('tf-accion').value.trim();
+    let operador = selTfOperador.value; if(operador==='__nuevo') operador='';
+    let responsable = selTfResponsable.value; if(responsable==='__nuevo') responsable='';
+
+    if(!fecha){ showToast('Indica la fecha'); return; }
+    if(!horaIni||!horaFin){ showToast('Indica hora inicial y final'); return; }
+    if(!maquina){ showToast('Indica el componente o máquina'); return; }
+    if(!operador){ showToast('Indica el operador'); return; }
+
+    const rec = {fecha,turno,planta,lote,horaIni,horaFin,maquina,tipo,desc,accion,operador,responsable};
+    const btn = document.getElementById('btn-guardar-tp');
+    btn.disabled=true; btn.textContent='Guardando…';
+    try{
+      if(tpEditingId){
+        await tpUpdateRecord(tpEditingId, rec);
+      }else{
+        await tpSaveRecord(rec);
+      }
+      await tpFetchAndApply();
+      tpRefreshGrid(); await tpRefreshAll(); await dpRefreshAll(); // refresca también OEE de Doy Pack
+      showToast(tpEditingId ? 'Evento actualizado' : 'Evento guardado'); closeTpModal();
+      ['tf-lote','tf-hora-ini','tf-hora-fin','tf-duracion','tf-maquina','tf-desc','tf-accion'].forEach(id=> document.getElementById(id).value='');
+    }catch(e){ console.error(e); showToast('No se pudo guardar. Intenta de nuevo.'); }
+    finally{ btn.disabled=false; btn.textContent='Guardar evento'; }
+  });
+
+  /* ---- dashboard Tiempos Perdidos ---- */
+  let tpPeriod = 'dia', tpRangoIni = null, tpRangoFin = null;
+  function tpSetPeriod(p){
+    tpPeriod = p;
+    document.querySelectorAll('[data-tp-period]').forEach(b=> b.classList.toggle('active', b.dataset.tpPeriod===p));
+    document.getElementById('tp-rango-wrap').style.display = p==='rango'?'flex':'none';
+    tpRefreshAll();
+  }
+  document.querySelectorAll('[data-tp-period]').forEach(btn=> btn.addEventListener('click', ()=> tpSetPeriod(btn.dataset.tpPeriod)));
+  document.getElementById('tp-rango-ini').addEventListener('change', ()=>{ tpRangoIni = document.getElementById('tp-rango-ini').value||null; if(tpPeriod==='rango') tpRefreshAll(); });
+  document.getElementById('tp-rango-fin').addEventListener('change', ()=>{ tpRangoFin = document.getElementById('tp-rango-fin').value||null; if(tpPeriod==='rango') tpRefreshAll(); });
+  document.getElementById('tp-fecha-ref').value = todayISO();
+  document.getElementById('btn-print-tp').addEventListener('click', ()=> window.print());
+  document.getElementById('btn-tp-limpiar').addEventListener('click', ()=>{
+    document.getElementById('tp-fecha-ref').value = todayISO(); document.getElementById('tp-planta-filter').value='';
+    document.getElementById('tp-rango-ini').value=''; document.getElementById('tp-rango-fin').value='';
+    tpRangoIni=null; tpRangoFin=null; tpSetPeriod('dia');
+  });
+  document.querySelectorAll('[data-tp-sub]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('[data-tp-sub]').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('#view-tp-dash .subview').forEach(v=>v.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tp-subview-'+btn.dataset.tpSub).classList.add('active');
+      // el canvas estaba oculto (display:none) al crear la gráfica, así que Chart.js no tenía tamaño real.
+      // Al mostrar la sub-pestaña, la volvemos a dibujar ya con el contenedor visible.
+      setTimeout(()=>{
+        const sub = btn.dataset.tpSub;
+        if(sub === 'pareto'){ if(chartPareto){ chartPareto.destroy(); chartPareto = null; } tpRefreshChartPareto(tpLastList); }
+        if(sub === 'planta'){ if(chartPlanta){ chartPlanta.destroy(); chartPlanta = null; } tpRefreshChartPlanta(tpLastList); }
+        if(sub === 'tendencia'){ if(chartTendenciaTP){ chartTendenciaTP.destroy(); chartTendenciaTP = null; } tpRefreshChartTendencia(tpLastList); }
+      }, 0);
+    });
+  });
+
+  function tpFilteredRecords(){
+    const refDate = document.getElementById('tp-fecha-ref').value || todayISO();
+    const planta = document.getElementById('tp-planta-filter').value;
+    return tpRecords.filter(r=>{
+      if(!isInPeriod(r.fecha, refDate, tpPeriod, tpRangoIni, tpRangoFin)) return false;
+      if(planta && r.planta !== planta) return false;
+      return true;
+    });
+  }
+  function tpRefreshHeroKpis(list){
+    const horas = list.reduce((s,r)=> s+duracionHrs(r.horaIni,r.horaFin),0);
+    const promedio = list.length? horas/list.length : 0;
+    document.getElementById('tp-hero-horas').textContent = fmtH(horas)+' hrs';
+    document.getElementById('tp-hero-sub').textContent = list.length+' evento'+(list.length!==1?'s':'')+' registrado'+(list.length!==1?'s':'');
+    document.getElementById('tp-hero-promedio').textContent = fmtH(promedio);
+    document.getElementById('tp-kpi-eventos').textContent = list.length;
+    document.getElementById('tp-kpi-horas').innerHTML = fmtH(horas)+' <small>hrs</small>';
+    document.getElementById('tp-kpi-promedio').innerHTML = fmtH(promedio)+' <small>hrs</small>';
+    document.getElementById('tp-kpi-plantas').textContent = new Set(list.map(r=>r.planta).filter(Boolean)).size;
+    const byPlanta={}; list.forEach(r=>{ byPlanta[r.planta]=(byPlanta[r.planta]||0)+duracionHrs(r.horaIni,r.horaFin); });
+    let pp=null,ppv=-1; Object.keys(byPlanta).forEach(k=>{ if(byPlanta[k]>ppv){ppv=byPlanta[k];pp=k;} });
+    document.getElementById('tp-hero-planta-peor').textContent = pp||'—';
+    const byTipo={}; list.forEach(r=>{ byTipo[r.tipo]=(byTipo[r.tipo]||0)+duracionHrs(r.horaIni,r.horaFin); });
+    let tt=null,ttv=-1; Object.keys(byTipo).forEach(k=>{ if(byTipo[k]>ttv){ttv=byTipo[k];tt=k;} });
+    document.getElementById('tp-hero-tipo-peor').textContent = tt||'—';
+    document.getElementById('tp-period-label').textContent = getPeriodLabel(document.getElementById('tp-fecha-ref').value||todayISO(), tpPeriod, tpRangoIni, tpRangoFin) + (document.getElementById('tp-planta-filter').value? ' · '+document.getElementById('tp-planta-filter').value : '');
+  }
+  function tpRefreshProcesoCards(){
+    const refDate = document.getElementById('tp-fecha-ref').value || todayISO();
+    const base = tpRecords.filter(r=> isInPeriod(r.fecha, refDate, tpPeriod, tpRangoIni, tpRangoFin));
+    const plantas = ['Frascos','Stick','Doy pack'];
+    document.getElementById('proceso-cards').innerHTML = plantas.map(pl=>{
+      const list = base.filter(r=>r.planta===pl);
+      const horas = list.reduce((s,r)=> s+duracionHrs(r.horaIni,r.horaFin),0);
+      const byTipo={}; list.forEach(r=>{ byTipo[r.tipo]=(byTipo[r.tipo]||0)+duracionHrs(r.horaIni,r.horaFin); });
+      let topCausa='—',tv=-1; Object.keys(byTipo).forEach(k=>{ if(byTipo[k]>tv){tv=byTipo[k];topCausa=k;} });
+      const byMaq={}; list.forEach(r=>{ if(r.maquina) byMaq[r.maquina]=(byMaq[r.maquina]||0)+duracionHrs(r.horaIni,r.horaFin); });
+      let topMaq='—',mv=-1; Object.keys(byMaq).forEach(k=>{ if(byMaq[k]>mv){mv=byMaq[k];topMaq=k;} });
+      const color = PLANTA_COLORS[pl]||'#8A8D91';
+      return `<div class="proc-card" style="--pc:${color};"><div class="pc-name">${pl}</div><div class="pc-main">${fmtH(horas)} <small>hrs perdidas</small></div>
+        <div class="pc-row"><span>Eventos</span><b>${list.length}</b></div><div class="pc-row"><span>Causa principal</span><b>${topCausa}</b></div>
+        <div class="pc-row"><span>Máquina con más paro</span><b>${topMaq}</b></div></div>`;
+    }).join('');
+  }
+  function tpRefreshChartPareto(list){
+    const byTipo={}; list.forEach(r=>{ byTipo[r.tipo]=(byTipo[r.tipo]||0)+duracionHrs(r.horaIni,r.horaFin); });
+    const sorted = Object.keys(byTipo).sort((a,b)=>byTipo[b]-byTipo[a]);
+    const total = sorted.reduce((s,k)=>s+byTipo[k],0)||1;
+    let acc=0; const acumulado = sorted.map(k=>{ acc+=byTipo[k]; return +(acc/total*100).toFixed(1); });
+    const ctx = document.getElementById('chart-pareto').getContext('2d');
+    const data = { labels:sorted, datasets:[
+      {type:'bar',label:'Horas',data:sorted.map(k=>+byTipo[k].toFixed(2)),backgroundColor:sorted.map(k=>TIPO_COLORS[k]||'#8A8D91'),borderRadius:6,yAxisID:'y'},
+      {type:'line',label:'% acumulado',data:acumulado,borderColor:'#1A1F23',backgroundColor:'#1A1F23',tension:.25,pointRadius:3,yAxisID:'y1'}
+    ]};
+    if(chartPareto){ chartPareto.data=data; chartPareto.update(); return; }
+    chartPareto = new Chart(ctx, {data, options:{ plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.type==='line'?c.parsed.y+'%':fmtH(c.parsed.y)+' hrs'}}},
+      scales:{y:{beginAtZero:true,position:'left',title:{display:true,text:'Horas'},grid:{color:'#EEF1F0'}}, y1:{beginAtZero:true,max:100,position:'right',title:{display:true,text:'% acumulado'},grid:{display:false},ticks:{callback:v=>v+'%'}}, x:{grid:{display:false},ticks:{font:{size:10}}}} }});
+  }
+  function tpRefreshChartPlanta(list){
+    const byPlanta={}; list.forEach(r=>{ byPlanta[r.planta]=(byPlanta[r.planta]||0)+duracionHrs(r.horaIni,r.horaFin); });
+    const labels = Object.keys(byPlanta).sort();
+    const data = { labels, datasets:[{data:labels.map(l=>+byPlanta[l].toFixed(2)),backgroundColor:labels.map(l=>PLANTA_COLORS[l]||'#8A8D91'),borderRadius:6,maxBarThickness:70}] };
+    const ctx = document.getElementById('chart-planta').getContext('2d');
+    if(chartPlanta){ chartPlanta.data=data; chartPlanta.update(); return; }
+    chartPlanta = new Chart(ctx, {type:'bar', data, options:{ plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmtH(c.parsed.y)+' hrs'}}}, scales:{y:{beginAtZero:true,grid:{color:'#EEF1F0'}},x:{grid:{display:false}}} }});
+  }
+  function tpRefreshRankingMaquina(list){
+    const byMaq={}; list.forEach(r=>{ if(!r.maquina) return; byMaq[r.maquina]=(byMaq[r.maquina]||0)+duracionHrs(r.horaIni,r.horaFin); });
+    const rows = Object.keys(byMaq).map(k=>({name:k,horas:byMaq[k]})).sort((a,b)=>b.horas-a.horas).slice(0,10);
+    const el = document.getElementById('ranking-maquina');
+    if(!rows.length){ el.innerHTML='<div class="empty">Sin datos en el período.</div>'; return; }
+    const maxH = Math.max(...rows.map(r=>r.horas),0.01);
+    el.innerHTML = rows.map(r=>{ const width=Math.max((r.horas/maxH)*100,3); return `<div class="rank-row"><div class="rank-name">${r.name}</div><div class="rank-bar-wrap"><div class="rank-bar" style="width:${width}%;background:#2E8B45;"></div></div><div class="rank-val">${fmtH(r.horas)} hrs</div></div>`; }).join('');
+  }
+  function tpRefreshChartTendencia(list){
+    const bucketKey = f=> tpPeriod==='año' ? f.substring(0,7) : f;
+    const byBucket={}; list.forEach(r=>{ const k=bucketKey(r.fecha); byBucket[k]=(byBucket[k]||0)+duracionHrs(r.horaIni,r.horaFin); });
+    const keys = Object.keys(byBucket).sort();
+    const labels = keys.map(k=> tpPeriod==='año' ? MESES[Number(k.substring(5,7))-1].slice(0,3) : k);
+    document.getElementById('tp-tendencia-title').textContent = tpPeriod==='año' ? 'Tendencia mensual de tiempo perdido' : 'Tendencia de tiempo perdido';
+    document.getElementById('tp-tendencia-hint').textContent = tpPeriod==='año' ? 'Horas perdidas por mes.' : 'Horas perdidas por día.';
+    const data = { labels, datasets:[{label:'Horas perdidas',data:keys.map(k=>+byBucket[k].toFixed(2)),borderColor:'#2E8B45',backgroundColor:'#2E8B4533',tension:.3,pointRadius:3,fill:true}] };
+    const ctx = document.getElementById('chart-tendencia-tp').getContext('2d');
+    if(chartTendenciaTP){ chartTendenciaTP.data=data; chartTendenciaTP.update(); return; }
+    chartTendenciaTP = new Chart(ctx, {type:'line', data, options:{ plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmtH(c.parsed.y)+' hrs'}}}, scales:{y:{beginAtZero:true,grid:{color:'#EEF1F0'}},x:{grid:{display:false}}} }});
+  }
+  function tpRefreshDetalle(list){
+    const tbody = document.getElementById('tbl-detalle-tp'); tbody.innerHTML='';
+    const sorted = [...list].sort((a,b)=> (b.fecha+b.horaIni).localeCompare(a.fecha+a.horaIni));
+    document.getElementById('tp-detalle-empty').style.display = sorted.length?'none':'block';
+    for(const r of sorted){
+      const col = TIPO_COLORS[r.tipo]||'#8A8D91'; const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${r.fecha}</td><td>${r.turno}</td><td>${r.planta}</td><td>${r.lote||'—'}</td><td>${r.maquina}</td>
+        <td><span class="pill" style="background:${col}22;color:${col};">${r.tipo}</span></td><td>${fmtH(duracionHrs(r.horaIni,r.horaFin))} hrs</td>
+        <td>${r.operador||'—'}</td><td>${r.responsable||'—'}</td>`;
+      tbody.appendChild(tr);
+    }
+  }
+  let tpLastList = [];
+  async function tpRefreshAll(){
+    const list = tpFilteredRecords();
+    tpLastList = list;
+    tpRefreshHeroKpis(list); tpRefreshProcesoCards(); tpRefreshChartPareto(list); tpRefreshChartPlanta(list);
+    tpRefreshRankingMaquina(list); tpRefreshChartTendencia(list); tpRefreshDetalle(list); tpRefreshGrid();
+  }
+
+  /* ============================================================
+     NAVEGACIÓN PRINCIPAL Y MODALES
+  ============================================================ */
+  const NAV_TOOLBAR = {'dp-grid':'toolbar-dp-grid','dp-dash':'toolbar-dp-dash','tp-grid':'toolbar-tp-grid','tp-dash':'toolbar-tp-dash'};
+  document.querySelectorAll('.navtab').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      document.querySelectorAll('.navtab').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+      Object.values(NAV_TOOLBAR).forEach(id=> document.getElementById(id).style.display='none');
+      btn.classList.add('active');
+      const nav = btn.dataset.nav;
+      document.getElementById('view-'+nav).classList.add('active');
+      document.getElementById(NAV_TOOLBAR[nav]).style.display = 'flex';
+      if(nav==='dp-dash') await dpRefreshAll();
+      if(nav==='tp-dash') await tpRefreshAll();
+      if(nav==='dp-grid') dpRefreshGrid();
+      if(nav==='tp-grid') tpRefreshGrid();
+    });
+  });
+
+  let dpEditingId = null;
+  const DP_PRESETS = ['28 grs Continental','32 grs Negro Café','96 grs Continental','120 grs Negro Café','250 grs Continental','250 grs'];
+
+  function openDpModal(editId){
+    dpEditingId = editId || null;
+    const modalTitle = document.querySelector('#dp-modal-overlay .modal-head-title');
+    const saveBtn = document.getElementById('btn-guardar');
+
+    if(dpEditingId){
+      const r = dpRecords.find(x=> x.id === dpEditingId || x._key === dpEditingId);
+      if(r){
+        modalTitle.textContent = '✏ Editar registro de turno — Doy Pack';
+        saveBtn.textContent = 'Guardar cambios';
+        document.getElementById('f-fecha').value = r.fecha;
+        document.getElementById('f-turno').value = r.turno;
+        if(DP_PRESETS.includes(r.presentacion)){
+          selPresentacion.value = r.presentacion;
+          otraWrap.style.display = 'none';
+        }else{
+          selPresentacion.value = '__otra';
+          otraWrap.style.display = 'block';
+          document.getElementById('f-presentacion-otra').value = r.presentacion || '';
+        }
+        document.getElementById('f-produccion-neta').value = netaDe(r);
+        document.getElementById('f-d1').value = r.d1 || 0;
+        document.getElementById('f-d2').value = r.d2 || 0;
+        document.getElementById('f-d3').value = r.d3 || 0;
+        document.getElementById('f-d4').value = r.d4 || 0;
+        actualizarNeta();
+        document.getElementById('f-obs').value = r.obs || '';
+        if(r.realizo && !operadores.includes(r.realizo)){ operadores.push(r.realizo); populateOperadorSelect(selRealizo); }
+        selRealizo.value = r.realizo || '';
+        realizoOtroWrap.style.display = 'none';
+      }
+    }else{
+      modalTitle.textContent = '➕ Nuevo registro de turno — Doy Pack';
+      saveBtn.textContent = 'Guardar registro';
+      document.getElementById('f-fecha').value = todayISO();
+      document.getElementById('f-turno').value = 'Turno 1';
+      selPresentacion.value = ''; otraWrap.style.display = 'none';
+      document.getElementById('f-presentacion-otra').value = '';
+      ['f-produccion-neta','f-produccion','f-obs','f-d1','f-d2','f-d3','f-d4'].forEach(id=> document.getElementById(id).value = '');
+      selRealizo.value = ''; realizoOtroWrap.style.display = 'none';
+    }
+    document.getElementById('dp-modal-overlay').classList.add('show');
+    setDpmTab('datos');
+  }
+  function closeDpModal(){ document.getElementById('dp-modal-overlay').classList.remove('show'); dpEditingId = null; }
+  function setDpmTab(t){
+    document.querySelectorAll('[data-dpm-tab]').forEach(b=> b.classList.toggle('active', b.dataset.dpmTab===t));
+    document.querySelectorAll('.modal-pane').forEach(p=>{ if(p.id.startsWith('dpm-pane')) p.classList.toggle('active', p.id==='dpm-pane-'+t); });
+  }
+  document.querySelectorAll('[data-dpm-tab]').forEach(btn=> btn.addEventListener('click', ()=> setDpmTab(btn.dataset.dpmTab)));
+  document.getElementById('btn-open-dp-modal').addEventListener('click', ()=> openDpModal());
+  document.getElementById('dp-modal-close').addEventListener('click', closeDpModal);
+  document.getElementById('dp-modal-cancel').addEventListener('click', closeDpModal);
+  document.getElementById('dp-modal-overlay').addEventListener('click', (e)=>{ if(e.target.id==='dp-modal-overlay') closeDpModal(); });
+  document.getElementById('btn-refresh-dp1').addEventListener('click', async ()=>{ await dpFetchAndApply(); dpRefreshGrid(); showToast('Actualizado'); });
+
+  let tpEditingId = null;
+
+  function openTpModal(editId){
+    tpEditingId = editId || null;
+    const modalTitle = document.querySelector('#tp-modal-overlay .modal-head-title');
+    const saveBtn = document.getElementById('btn-guardar-tp');
+
+    if(tpEditingId){
+      const r = tpRecords.find(x=> x.id === tpEditingId);
+      if(r){
+        modalTitle.textContent = '✏ Editar evento de paro';
+        saveBtn.textContent = 'Guardar cambios';
+        document.getElementById('tf-fecha').value = r.fecha;
+        document.getElementById('tf-turno').value = r.turno;
+        document.getElementById('tf-planta').value = r.planta;
+        document.getElementById('tf-lote').value = r.lote || '';
+        document.getElementById('tf-hora-ini').value = r.horaIni || '';
+        document.getElementById('tf-hora-fin').value = r.horaFin || '';
+        tpActualizarDuracion();
+        document.getElementById('tf-maquina').value = r.maquina || '';
+        document.getElementById('tf-tipo').value = r.tipo;
+        document.getElementById('tf-desc').value = r.desc || '';
+        document.getElementById('tf-accion').value = r.accion || '';
+        if(r.operador && !tpOperadores.includes(r.operador)){ tpOperadores.push(r.operador); populateSelectTP(selTfOperador, tpOperadores); }
+        selTfOperador.value = r.operador || ''; tfOperadorOtroWrap.style.display = 'none';
+        if(r.responsable && !tpResponsables.includes(r.responsable)){ tpResponsables.push(r.responsable); populateSelectTP(selTfResponsable, tpResponsables); }
+        selTfResponsable.value = r.responsable || ''; tfResponsableOtroWrap.style.display = 'none';
+      }
+    }else{
+      modalTitle.textContent = '➕ Nuevo evento de paro';
+      saveBtn.textContent = 'Guardar evento';
+      document.getElementById('tf-fecha').value = todayISO();
+      document.getElementById('tf-turno').value = 'Primero';
+      document.getElementById('tf-planta').value = 'Frascos';
+      ['tf-lote','tf-hora-ini','tf-hora-fin','tf-duracion','tf-maquina','tf-desc','tf-accion'].forEach(id=> document.getElementById(id).value = '');
+      document.getElementById('tf-tipo').value = '🧰 Mantenimiento Correctivo';
+      selTfOperador.value = ''; tfOperadorOtroWrap.style.display = 'none';
+      selTfResponsable.value = ''; tfResponsableOtroWrap.style.display = 'none';
+    }
+    document.getElementById('tp-modal-overlay').classList.add('show');
+    setTpmTab('datos');
+  }
+  function closeTpModal(){ document.getElementById('tp-modal-overlay').classList.remove('show'); tpEditingId = null; }
+  function setTpmTab(t){
+    document.querySelectorAll('[data-tpm-tab]').forEach(b=> b.classList.toggle('active', b.dataset.tpmTab===t));
+    document.querySelectorAll('.modal-pane').forEach(p=>{ if(p.id.startsWith('tpm-pane')) p.classList.toggle('active', p.id==='tpm-pane-'+t); });
+  }
+  document.querySelectorAll('[data-tpm-tab]').forEach(btn=> btn.addEventListener('click', ()=> setTpmTab(btn.dataset.tpmTab)));
+  document.getElementById('btn-open-tp-modal').addEventListener('click', ()=> openTpModal());
+  document.getElementById('tp-modal-close').addEventListener('click', closeTpModal);
+  document.getElementById('tp-modal-cancel').addEventListener('click', closeTpModal);
+  document.getElementById('tp-modal-overlay').addEventListener('click', (e)=>{ if(e.target.id==='tp-modal-overlay') closeTpModal(); });
+  document.getElementById('btn-refresh-tp1').addEventListener('click', async ()=>{ await tpFetchAndApply(); tpRefreshGrid(); showToast('Actualizado'); });
+
+  /* ============================================================
+     POLLING + INIT
+  ============================================================ */
   function iniciarPolling(){
     setInterval(async ()=>{
       try{
-        const d = await fbGetDoc();
-        if(d && Number(d.ts||0) > _lastTs){
-          _remoteDoc = { records: Array.isArray(d.records)?d.records:[], operadores: Array.isArray(d.operadores)&&d.operadores.length?d.operadores:operadores, responsables: Array.isArray(d.responsables)&&d.responsables.length?d.responsables:responsables, ts: Number(d.ts)||0 };
-          operadores = _remoteDoc.operadores;
-          responsables = _remoteDoc.responsables;
-          records = _remoteDoc.records.slice();
-          records.sort((a,b)=> (a.fecha+a.horaIni).localeCompare(b.fecha+b.horaIni));
-          _lastTs = _remoteDoc.ts;
-          populateSelect(selOperador, operadores, selOperador.value);
-          populateSelect(selResponsable, responsables, selResponsable.value);
-          await refreshAll();
+        const [dDp, dTp] = await Promise.all([fbGet(DOC_DP), fbGet(DOC_TP)]);
+        let cambioDp=false, cambioTp=false;
+        if(dDp && Number(dDp.ts||0) > dpLastTs){
+          dpRemote = { records: Array.isArray(dDp.records)?dDp.records:[], operadores: Array.isArray(dDp.operadores)&&dDp.operadores.length?dDp.operadores:operadores, tasasIdeales:(dDp.tasasIdeales&&Object.keys(dDp.tasasIdeales).length)?dDp.tasasIdeales:tasasIdeales, horasEfectivas:Number(dDp.horasEfectivas)>0?Number(dDp.horasEfectivas):horasEfectivas, ts:Number(dDp.ts)||0 };
+          operadores = dpRemote.operadores; tasasIdeales = dpRemote.tasasIdeales; horasEfectivas = dpRemote.horasEfectivas;
+          dpRecords = dpRemote.records.map(r=>({...r,_key:r.id}));
+          dpRecords.sort((a,b)=> (a.fecha+a.turno).localeCompare(b.fecha+b.turno));
+          dpLastTs = dpRemote.ts; populateOperadorSelect(selRealizo, selRealizo.value); cambioDp=true;
+        }
+        if(dTp && Number(dTp.ts||0) > tpLastTs){
+          tpRemote = { records: Array.isArray(dTp.records)?dTp.records:[], operadores: Array.isArray(dTp.operadores)&&dTp.operadores.length?dTp.operadores:tpOperadores, responsables: Array.isArray(dTp.responsables)&&dTp.responsables.length?dTp.responsables:tpResponsables, ts:Number(dTp.ts)||0 };
+          tpOperadores = tpRemote.operadores; tpResponsables = tpRemote.responsables;
+          tpRecords = tpRemote.records.slice();
+          tpRecords.sort((a,b)=> (a.fecha+a.horaIni).localeCompare(b.fecha+b.horaIni));
+          tpLastTs = tpRemote.ts; populateSelectTP(selTfOperador, tpOperadores, selTfOperador.value); populateSelectTP(selTfResponsable, tpResponsables, selTfResponsable.value); cambioTp=true;
+        }
+        if(cambioDp || cambioTp){
+          const activeNav = document.querySelector('.navtab.active').dataset.nav;
+          if(activeNav==='dp-grid') dpRefreshGrid();
+          if(activeNav==='dp-dash') await dpRefreshAll();
+          if(activeNav==='tp-grid') tpRefreshGrid();
+          if(activeNav==='tp-dash') await tpRefreshAll();
         }
         setSyncStatus('☁ Sincronizado', true);
       }catch(e){ setSyncStatus('Sin conexión', false); }
     }, 8000);
   }
 
-  async function saveOperadores(){ _remoteDoc.operadores = operadores; _remoteDoc.ts = Date.now(); await fbSaveDoc(_remoteDoc); _lastTs = _remoteDoc.ts; }
-  async function saveResponsables(){ _remoteDoc.responsables = responsables; _remoteDoc.ts = Date.now(); await fbSaveDoc(_remoteDoc); _lastTs = _remoteDoc.ts; }
-
-  async function saveRecord(rec){
-    const id = rec.fecha + '_' + rec.horaIni.replace(':','') + '_' + Date.now();
-    _remoteDoc.records = [..._remoteDoc.records, {...rec, id}];
-    _remoteDoc.ts = Date.now();
-    await fbSaveDoc(_remoteDoc);
-    _lastTs = _remoteDoc.ts;
-  }
-  async function deleteRecord(id){
-    _remoteDoc.records = _remoteDoc.records.filter(r=> r.id !== id);
-    _remoteDoc.ts = Date.now();
-    await fbSaveDoc(_remoteDoc);
-    _lastTs = _remoteDoc.ts;
-  }
-
-  // ---------- utils ----------
-  function fmt(n){ return new Intl.NumberFormat('es-MX').format(Math.round(n)); }
-  function fmtH(n){ return (Math.round(n*100)/100).toLocaleString('es-MX',{minimumFractionDigits:1,maximumFractionDigits:2}); }
-  function todayISO(){ return new Date().toISOString().slice(0,10); }
-  function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
-  function duracionHrs(rec){
-    if(!rec.horaIni || !rec.horaFin) return 0;
-    const [h1,m1] = rec.horaIni.split(':').map(Number);
-    const [h2,m2] = rec.horaFin.split(':').map(Number);
-    let mins = (h2*60+m2) - (h1*60+m1);
-    if(mins < 0) mins += 24*60; // cruza medianoche
-    return mins/60;
-  }
-
-  // ---------- operadores / responsables ----------
-  function populateSelect(selectEl, list, selected){
-    selectEl.innerHTML = list.slice().sort((a,b)=>a.localeCompare(b)).map(o=>`<option value="${o}">${o}</option>`).join('') + '<option value="__nuevo">+ Agregar…</option>';
-    if(selected && list.includes(selected)) selectEl.value = selected;
-  }
-
-  const selOperador = document.getElementById('f-operador');
-  const operadorOtroWrap = document.getElementById('f-operador-otro-wrap');
-  const operadorOtroInput = document.getElementById('f-operador-otro');
-  populateSelect(selOperador, operadores);
-  selOperador.addEventListener('change', ()=>{
-    if(selOperador.value === '__nuevo'){ operadorOtroWrap.style.display='block'; operadorOtroInput.value=''; operadorOtroInput.focus(); }
-    else operadorOtroWrap.style.display='none';
-  });
-  document.getElementById('btn-cancel-operador').addEventListener('click', ()=>{ operadorOtroWrap.style.display='none'; selOperador.value = operadores[0]||''; });
-  document.getElementById('btn-add-operador').addEventListener('click', async ()=>{
-    const name = operadorOtroInput.value.trim();
-    if(!name){ showToast('Escribe el nombre'); return; }
-    if(!operadores.some(o=>o.toLowerCase()===name.toLowerCase())){ operadores.push(name); await saveOperadores(); }
-    populateSelect(selOperador, operadores, name);
-    operadorOtroWrap.style.display='none';
-    showToast('Operador agregado');
-  });
-
-  const selResponsable = document.getElementById('f-responsable');
-  const responsableOtroWrap = document.getElementById('f-responsable-otro-wrap');
-  const responsableOtroInput = document.getElementById('f-responsable-otro');
-  populateSelect(selResponsable, responsables);
-  selResponsable.addEventListener('change', ()=>{
-    if(selResponsable.value === '__nuevo'){ responsableOtroWrap.style.display='block'; responsableOtroInput.value=''; responsableOtroInput.focus(); }
-    else responsableOtroWrap.style.display='none';
-  });
-  document.getElementById('btn-cancel-responsable').addEventListener('click', ()=>{ responsableOtroWrap.style.display='none'; selResponsable.value = responsables[0]||''; });
-  document.getElementById('btn-add-responsable').addEventListener('click', async ()=>{
-    const name = responsableOtroInput.value.trim();
-    if(!name){ showToast('Escribe el nombre'); return; }
-    if(!responsables.some(o=>o.toLowerCase()===name.toLowerCase())){ responsables.push(name); await saveResponsables(); }
-    populateSelect(selResponsable, responsables, name);
-    responsableOtroWrap.style.display='none';
-    showToast('Responsable agregado');
-  });
-
-  // ---------- captura ----------
-  document.getElementById('f-fecha').value = todayISO();
-  function actualizarDuracion(){
-    const ini = document.getElementById('f-hora-ini').value;
-    const fin = document.getElementById('f-hora-fin').value;
-    const el = document.getElementById('f-duracion');
-    if(ini && fin){ el.value = fmtH(duracionHrs({horaIni:ini,horaFin:fin})) + ' hrs'; }
-    else el.value = '';
-  }
-  document.getElementById('f-hora-ini').addEventListener('change', actualizarDuracion);
-  document.getElementById('f-hora-fin').addEventListener('change', actualizarDuracion);
-
-  async function refreshRecientes(){
-    const tbody = document.getElementById('tbl-recientes');
-    tbody.innerHTML = '';
-    const recent = [...records].sort((a,b)=> (b.fecha+b.horaIni).localeCompare(a.fecha+a.horaIni)).slice(0,8);
-    document.getElementById('recientes-empty').style.display = recent.length ? 'none':'block';
-    for(const r of recent){
-      const tr = document.createElement('tr');
-      const col = TIPO_COLORS[r.tipo] || '#8A8D91';
-      tr.innerHTML = `
-        <td>${r.fecha}</td><td>${r.turno}</td><td>${r.planta}</td><td>${r.maquina}</td>
-        <td><span class="pill" style="background:${col}22;color:${col};">${r.tipo}</span></td>
-        <td>${fmtH(duracionHrs(r))} hrs</td><td>${r.operador||'—'}</td>
-        <td><button class="btn-danger" data-del="${r.id}">Eliminar</button></td>`;
-      tbody.appendChild(tr);
-    }
-    tbody.querySelectorAll('[data-del]').forEach(btn=>{
-      btn.addEventListener('click', async (e)=>{
-        await deleteRecord(e.target.getAttribute('data-del'));
-        await loadRecordsOnly();
-        await refreshAll();
-        showToast('Evento eliminado');
-      });
-    });
-  }
-
-  async function loadRecordsOnly(){
-    const d = await fbGetDoc();
-    if(d){
-      records = (Array.isArray(d.records)?d.records:[]).slice();
-      records.sort((a,b)=> (a.fecha+a.horaIni).localeCompare(b.fecha+b.horaIni));
-    }
-  }
-
-  document.getElementById('btn-guardar').addEventListener('click', async ()=>{
-    const fecha = document.getElementById('f-fecha').value;
-    const turno = document.getElementById('f-turno').value;
-    const planta = document.getElementById('f-planta').value;
-    const lote = document.getElementById('f-lote').value.trim();
-    const horaIni = document.getElementById('f-hora-ini').value;
-    const horaFin = document.getElementById('f-hora-fin').value;
-    const maquina = document.getElementById('f-maquina').value.trim();
-    const tipo = document.getElementById('f-tipo').value;
-    const desc = document.getElementById('f-desc').value.trim();
-    const accion = document.getElementById('f-accion').value.trim();
-    let operador = selOperador.value; if(operador==='__nuevo') operador='';
-    let responsable = selResponsable.value; if(responsable==='__nuevo') responsable='';
-
-    if(!fecha){ showToast('Indica la fecha'); return; }
-    if(!horaIni || !horaFin){ showToast('Indica hora inicial y final'); return; }
-    if(!maquina){ showToast('Indica el componente o máquina'); return; }
-    if(!operador){ showToast('Indica el operador'); return; }
-
-    const rec = {fecha, turno, planta, lote, horaIni, horaFin, maquina, tipo, desc, accion, operador, responsable};
-    const btn = document.getElementById('btn-guardar');
-    btn.disabled = true; btn.textContent = 'Guardando…';
-    try{
-      await saveRecord(rec);
-      await loadRecordsOnly();
-      await refreshAll();
-      showToast('Evento guardado');
-      ['f-lote','f-hora-ini','f-hora-fin','f-duracion','f-maquina','f-desc','f-accion'].forEach(id=> document.getElementById(id).value = '');
-    }catch(e){
-      console.error(e);
-      showToast('No se pudo guardar. Intenta de nuevo.');
-    }finally{
-      btn.disabled = false; btn.textContent = 'Guardar evento';
-    }
-  });
-
-  // ---------- dashboard ----------
-  function isoWeek(dateStr){
-    const d = new Date(dateStr+'T00:00:00');
-    const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-    t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay()||7));
-    const y0 = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
-    return t.getUTCFullYear()+'-W'+String(Math.ceil((((t-y0)/86400000)+1)/7)).padStart(2,'0');
-  }
-  let _period = 'dia';
-  let _rangoIni = null, _rangoFin = null;
-  function isInPeriod(dateStr, refDate, period){
-    if(!dateStr) return false;
-    if(period === 'rango') return _rangoIni && _rangoFin && dateStr >= _rangoIni && dateStr <= _rangoFin;
-    if(period === 'dia')    return dateStr === refDate;
-    if(period === 'semana') return isoWeek(dateStr) === isoWeek(refDate);
-    if(period === 'mes')    return dateStr.substring(0,7) === refDate.substring(0,7);
-    if(period === 'año')    return dateStr.substring(0,4) === refDate.substring(0,4);
-    return false;
-  }
-  function getPeriodLabel(refDate, period){
-    if(period === 'dia')    return 'Día: ' + refDate;
-    if(period === 'semana') return 'Semana ' + isoWeek(refDate).split('-W')[1] + ' · ' + isoWeek(refDate).split('-')[0];
-    if(period === 'mes')    return MESES[Number(refDate.substring(5,7))-1] + ' ' + refDate.substring(0,4);
-    if(period === 'año')    return 'Año ' + refDate.substring(0,4);
-    if(period === 'rango')  return _rangoIni && _rangoFin ? (_rangoIni + ' al ' + _rangoFin) : 'Selecciona un rango';
-    return '';
-  }
-  function setPeriod(p){
-    _period = p;
-    document.querySelectorAll('.btn-period').forEach(b=> b.classList.toggle('active', b.dataset.period === p));
-    document.getElementById('rango-wrap').style.display = p === 'rango' ? 'flex' : 'none';
-    refreshAll();
-  }
-  document.querySelectorAll('.btn-period').forEach(btn=> btn.addEventListener('click', ()=> setPeriod(btn.dataset.period)));
-  document.getElementById('dash-rango-ini').addEventListener('change', ()=>{ _rangoIni = document.getElementById('dash-rango-ini').value||null; if(_period==='rango') refreshAll(); });
-  document.getElementById('dash-rango-fin').addEventListener('change', ()=>{ _rangoFin = document.getElementById('dash-rango-fin').value||null; if(_period==='rango') refreshAll(); });
-  document.getElementById('dash-fecha-ref').value = todayISO();
-  document.getElementById('btn-imprimir').addEventListener('click', ()=> window.print());
-  document.getElementById('btn-limpiar-filtros').addEventListener('click', ()=>{
-    document.getElementById('dash-fecha-ref').value = todayISO();
-    document.getElementById('dash-planta').value = '';
-    document.getElementById('dash-rango-ini').value = '';
-    document.getElementById('dash-rango-fin').value = '';
-    _rangoIni = null; _rangoFin = null;
-    setPeriod('dia');
-  });
-
-  function filteredRecords(){
-    const refDate = document.getElementById('dash-fecha-ref').value || todayISO();
-    const planta = document.getElementById('dash-planta').value;
-    return records.filter(r=>{
-      if(!isInPeriod(r.fecha, refDate, _period)) return false;
-      if(planta && r.planta !== planta) return false;
-      return true;
-    });
-  }
-
-  let chartPareto, chartPlanta, chartTendencia;
-
-  function refreshHeroKpis(list){
-    const horas = list.reduce((s,r)=> s + duracionHrs(r), 0);
-    const promedio = list.length ? horas/list.length : 0;
-    document.getElementById('hero-horas').textContent = fmtH(horas) + ' hrs';
-    document.getElementById('hero-sub').textContent = list.length + ' evento' + (list.length!==1?'s':'') + ' registrado' + (list.length!==1?'s':'');
-    document.getElementById('hero-promedio').textContent = fmtH(promedio);
-    document.getElementById('kpi-eventos').textContent = list.length;
-    document.getElementById('kpi-horas').innerHTML = fmtH(horas) + ' <small>hrs</small>';
-    document.getElementById('kpi-promedio').innerHTML = fmtH(promedio) + ' <small>hrs</small>';
-    const plantasSet = new Set(list.map(r=>r.planta).filter(Boolean));
-    document.getElementById('kpi-plantas').textContent = plantasSet.size;
-
-    const byPlanta = {};
-    list.forEach(r=>{ byPlanta[r.planta] = (byPlanta[r.planta]||0) + duracionHrs(r); });
-    let peorPlanta = null, peorPlantaVal = -1;
-    Object.keys(byPlanta).forEach(k=>{ if(byPlanta[k] > peorPlantaVal){ peorPlantaVal = byPlanta[k]; peorPlanta = k; } });
-    document.getElementById('hero-planta-peor').textContent = peorPlanta || '—';
-
-    const byTipo = {};
-    list.forEach(r=>{ byTipo[r.tipo] = (byTipo[r.tipo]||0) + duracionHrs(r); });
-    let peorTipo = null, peorTipoVal = -1;
-    Object.keys(byTipo).forEach(k=>{ if(byTipo[k] > peorTipoVal){ peorTipoVal = byTipo[k]; peorTipo = k; } });
-    document.getElementById('hero-tipo-peor').textContent = peorTipo || '—';
-
-    document.getElementById('dash-period-label').textContent = getPeriodLabel(document.getElementById('dash-fecha-ref').value || todayISO(), _period) + (document.getElementById('dash-planta').value ? ' · ' + document.getElementById('dash-planta').value : '');
-  }
-
-  function refreshChartPareto(list){
-    const byTipo = {};
-    list.forEach(r=>{ byTipo[r.tipo] = (byTipo[r.tipo]||0) + duracionHrs(r); });
-    const sorted = Object.keys(byTipo).sort((a,b)=> byTipo[b]-byTipo[a]);
-    const total = sorted.reduce((s,k)=> s+byTipo[k], 0) || 1;
-    let acc = 0;
-    const acumulado = sorted.map(k=>{ acc += byTipo[k]; return +(acc/total*100).toFixed(1); });
-    const ctx = document.getElementById('chart-pareto').getContext('2d');
-    const data = {
-      labels: sorted,
-      datasets: [
-        { type:'bar', label:'Horas', data: sorted.map(k=>+byTipo[k].toFixed(2)), backgroundColor: sorted.map(k=>TIPO_COLORS[k]||'#8A8D91'), borderRadius:6, yAxisID:'y' },
-        { type:'line', label:'% acumulado', data: acumulado, borderColor:'#2C1F16', backgroundColor:'#2C1F16', tension:.25, pointRadius:3, yAxisID:'y1' }
-      ]
-    };
-    if(chartPareto){ chartPareto.data = data; chartPareto.update(); return; }
-    chartPareto = new Chart(ctx, { data, options:{
-      plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=> c.dataset.type==='line' ? c.parsed.y+'%' : fmtH(c.parsed.y)+' hrs'}}},
-      scales:{
-        y:{beginAtZero:true, position:'left', title:{display:true,text:'Horas'}, grid:{color:'#EFE6D8'}},
-        y1:{beginAtZero:true, max:100, position:'right', title:{display:true,text:'% acumulado'}, grid:{display:false}, ticks:{callback:v=>v+'%'}},
-        x:{grid:{display:false}, ticks:{font:{size:10}}}
-      }
-    }});
-  }
-
-  function refreshChartPlanta(list){
-    const byPlanta = {};
-    list.forEach(r=>{ byPlanta[r.planta] = (byPlanta[r.planta]||0) + duracionHrs(r); });
-    const labels = Object.keys(byPlanta).sort();
-    const data = { labels, datasets:[{ data: labels.map(l=>+byPlanta[l].toFixed(2)), backgroundColor: labels.map(l=>PLANTA_COLORS[l]||'#8A8D91'), borderRadius:6, maxBarThickness:70 }] };
-    const ctx = document.getElementById('chart-planta').getContext('2d');
-    if(chartPlanta){ chartPlanta.data = data; chartPlanta.update(); return; }
-    chartPlanta = new Chart(ctx, { type:'bar', data, options:{ plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmtH(c.parsed.y)+' hrs'}}}, scales:{ y:{beginAtZero:true,grid:{color:'#EFE6D8'}}, x:{grid:{display:false}} } } });
-  }
-
-  function refreshRankingMaquina(list){
-    const byMaq = {};
-    list.forEach(r=>{ if(!r.maquina) return; byMaq[r.maquina] = (byMaq[r.maquina]||0) + duracionHrs(r); });
-    const rows = Object.keys(byMaq).map(k=>({name:k, horas:byMaq[k]})).sort((a,b)=>b.horas-a.horas).slice(0,10);
-    const el = document.getElementById('ranking-maquina');
-    if(!rows.length){ el.innerHTML = '<div class="empty">Sin datos en el período.</div>'; return; }
-    const maxH = Math.max(...rows.map(r=>r.horas), 0.01);
-    el.innerHTML = rows.map(r=>{
-      const width = Math.max((r.horas/maxH)*100, 3);
-      return `<div class="rank-row">
-        <div class="rank-name">${r.name}</div>
-        <div class="rank-bar-wrap"><div class="rank-bar" style="width:${width}%;background:#C17817;"></div></div>
-        <div class="rank-val">${fmtH(r.horas)} hrs</div>
-      </div>`;
-    }).join('');
-  }
-
-  function refreshChartTendencia(list){
-    const bucketKey = (fecha)=> _period === 'año' ? fecha.substring(0,7) : fecha;
-    const byBucket = {};
-    list.forEach(r=>{ const k = bucketKey(r.fecha); byBucket[k] = (byBucket[k]||0) + duracionHrs(r); });
-    const keys = Object.keys(byBucket).sort();
-    const labels = keys.map(k=> _period==='año' ? MESES[Number(k.substring(5,7))-1].slice(0,3) : k);
-    document.getElementById('tendencia-title').textContent = _period==='año' ? 'Tendencia mensual de tiempo perdido' : 'Tendencia de tiempo perdido';
-    document.getElementById('tendencia-hint').textContent = _period==='año' ? 'Horas perdidas por mes en el año.' : 'Horas perdidas por día en el período.';
-    const data = { labels, datasets:[{ label:'Horas perdidas', data: keys.map(k=>+byBucket[k].toFixed(2)), borderColor:'#C17817', backgroundColor:'#C1781733', tension:.3, pointRadius:3, fill:true }] };
-    const ctx = document.getElementById('chart-tendencia').getContext('2d');
-    if(chartTendencia){ chartTendencia.data = data; chartTendencia.update(); return; }
-    chartTendencia = new Chart(ctx, { type:'line', data, options:{ plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>fmtH(c.parsed.y)+' hrs'}}}, scales:{ y:{beginAtZero:true,grid:{color:'#EFE6D8'}}, x:{grid:{display:false}} } } });
-  }
-
-  function refreshDetalle(list){
-    const tbody = document.getElementById('tbl-detalle');
-    tbody.innerHTML = '';
-    const sorted = [...list].sort((a,b)=> (b.fecha+b.horaIni).localeCompare(a.fecha+a.horaIni));
-    document.getElementById('detalle-empty').style.display = sorted.length ? 'none' : 'block';
-    for(const r of sorted){
-      const col = TIPO_COLORS[r.tipo] || '#8A8D91';
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${r.fecha}</td><td>${r.turno}</td><td>${r.planta}</td><td>${r.lote||'—'}</td><td>${r.maquina}</td>
-        <td><span class="pill" style="background:${col}22;color:${col};">${r.tipo}</span></td>
-        <td>${fmtH(duracionHrs(r))} hrs</td><td>${r.operador||'—'}</td><td>${r.responsable||'—'}</td>`;
-      tbody.appendChild(tr);
-    }
-  }
-
-  function refreshProcesoCards(){
-    // Siempre usa el período activo, pero ignora el filtro de planta para poder comparar los 3 a la vez
-    const refDate = document.getElementById('dash-fecha-ref').value || todayISO();
-    const base = records.filter(r=> isInPeriod(r.fecha, refDate, _period));
-    const plantas = ['Frascos','Stick','Doy pack'];
-    const el = document.getElementById('proceso-cards');
-    el.innerHTML = plantas.map(pl=>{
-      const list = base.filter(r=> r.planta === pl);
-      const horas = list.reduce((s,r)=> s + duracionHrs(r), 0);
-      const byTipo = {};
-      list.forEach(r=>{ byTipo[r.tipo] = (byTipo[r.tipo]||0) + duracionHrs(r); });
-      let topCausa = '—', topCausaVal = -1;
-      Object.keys(byTipo).forEach(k=>{ if(byTipo[k] > topCausaVal){ topCausaVal = byTipo[k]; topCausa = k; } });
-      const byMaq = {};
-      list.forEach(r=>{ if(r.maquina) byMaq[r.maquina] = (byMaq[r.maquina]||0) + duracionHrs(r); });
-      let topMaq = '—', topMaqVal = -1;
-      Object.keys(byMaq).forEach(k=>{ if(byMaq[k] > topMaqVal){ topMaqVal = byMaq[k]; topMaq = k; } });
-      const color = PLANTA_COLORS[pl] || '#8A8D91';
-      return `<div class="proceso-card" style="--pc:${color};">
-        <div class="pc-name">${pl}</div>
-        <div class="pc-main">${fmtH(horas)} <small>hrs perdidas</small></div>
-        <div class="pc-row"><span>Eventos</span><b>${list.length}</b></div>
-        <div class="pc-row"><span>Causa principal</span><b>${topCausa}</b></div>
-        <div class="pc-row"><span>Máquina con más paro</span><b>${topMaq}</b></div>
-      </div>`;
-    }).join('');
-  }
-
-  async function refreshAll(){
-    const list = filteredRecords();
-    refreshHeroKpis(list);
-    refreshProcesoCards();
-    refreshChartPareto(list);
-    refreshChartPlanta(list);
-    refreshRankingMaquina(list);
-    refreshChartTendencia(list);
-    refreshDetalle(list);
-    await refreshRecientes();
-  }
-
-  // tabs
-  document.querySelectorAll('.tab').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
-      document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById('view-' + btn.dataset.view).classList.add('active');
-      if(btn.dataset.view === 'dashboard') refreshAll();
-    });
-  });
-
-  // sub-tabs del dashboard
-  document.querySelectorAll('.subtab').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      document.querySelectorAll('.subtab').forEach(b=>b.classList.remove('active'));
-      document.querySelectorAll('.subview').forEach(v=>v.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById('subview-' + btn.dataset.subtab).classList.add('active');
-      // Chart.js necesita recalcular tamaño al mostrar un canvas que estaba oculto
-      setTimeout(()=>{
-        if(chartPareto) chartPareto.resize();
-        if(chartPlanta) chartPlanta.resize();
-        if(chartTendencia) chartTendencia.resize();
-      }, 0);
-    });
-  });
-
-  // ---------- init ----------
   async function init(){
     setSyncStatus('Cargando…', null);
     try{
-      await fetchAndApplyDoc();
-      populateSelect(selOperador, operadores);
-      populateSelect(selResponsable, responsables);
+      await Promise.all([dpFetchAndApply(), tpFetchAndApply()]);
+      populateOperadorSelect(selRealizo);
+      populateSelectTP(selTfOperador, tpOperadores);
+      populateSelectTP(selTfResponsable, tpResponsables);
+      dpRefreshGrid();
       setSyncStatus('☁ Sincronizado', true);
       iniciarPolling();
     }catch(e){
@@ -856,9 +1436,7 @@
       setSyncStatus('Sin conexión', false);
       showToast('No se pudo conectar a la base de datos. Revisa tu conexión.');
     }
-    await refreshAll();
   }
-
   init();
 })();
 </script>
